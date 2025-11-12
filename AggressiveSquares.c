@@ -11,14 +11,15 @@
 
 unsigned char collision_2D(square *element_first, square *element_second){
 
-	if ((((element_first->y+element_first->side/2 >= element_second->y-element_second->side/2) &&
-	(element_second->y-element_second->side/2 >= element_first->y-element_first->side/2)) || 				
-		((element_second->y+element_second->side/2 >= element_first->y-element_first->side/2) &&
-		(element_first->y-element_first->side/2 >= element_second->y-element_second->side/2))) && 	
-		(((element_first->x+element_first->side/2 >= element_second->x-element_second->side/2) &&
-		(element_second->x-element_second->side/2 >= element_first->x-element_first->side/2)) || 
-		((element_second->x+element_second->side/2 >= element_first->x-element_first->side/2) &&
-		(element_first->x-element_first->side/2 >= element_second->x-element_second->side/2)))) return 1;		
+	if ((((element_first->y +element_first->yside/2 >= element_second->y -element_second->yside/2) &&
+	    (element_second->y -element_second->yside/2 >= element_first->y -element_first->yside/2)) || 				
+		((element_second->y +element_second->yside/2 >= element_first->y -element_first->yside/2) &&
+		(element_first->y -element_first->yside/2 >= element_second->y -element_second->yside/2))) && 	
+		(((element_first->x +element_first->xside/2 >= element_second->x -element_second->xside/2) &&
+		(element_second->x -element_second->xside/2 >= element_first->x -element_first->xside/2)) || 
+		((element_second->x +element_second->xside/2 >= element_first->x -element_first->xside/2) &&
+		(element_first->x -element_first->xside/2 >= element_second->x -element_second->xside/2)))) 
+		return 1;		
 	else return 0;
 }
 
@@ -26,37 +27,45 @@ unsigned char collision_2D(square *element_first, square *element_second){
 void update_position(square *player_1, square *player_2){				
 	if (player_1->control->left){																				
 		square_move(player_1, 1, 0, X_SCREEN, Y_SCREEN);														
-		if (collision_2D(player_1, player_2)) square_move(player_1, -1, 0, X_SCREEN, Y_SCREEN);	
+		if (collision_2D(player_1, player_2))
+		    square_move(player_1, -1, 0, X_SCREEN, Y_SCREEN);	
 	}
 	if (player_1->control->right){																				
 		square_move(player_1, 1, 1, X_SCREEN, Y_SCREEN);														
-		if (collision_2D(player_1, player_2)) square_move(player_1, -1, 1, X_SCREEN, Y_SCREEN);					
+		if (collision_2D(player_1, player_2)) 
+		    square_move(player_1, -1, 1, X_SCREEN, Y_SCREEN);					
 	}
 	if (player_1->control->up) {																				
 		square_move(player_1, 1, 2, X_SCREEN, Y_SCREEN);														
-		if (collision_2D(player_1, player_2)) square_move(player_1, -1, 2, X_SCREEN, Y_SCREEN);					
+		if (collision_2D(player_1, player_2)) 
+		    square_move(player_1, -1, 2, X_SCREEN, Y_SCREEN);					
 	}
 	if (player_1->control->down){																				
 		square_move(player_1, 1, 3, X_SCREEN, Y_SCREEN);														
-		if (collision_2D(player_1, player_2)) square_move(player_1, -1, 3, X_SCREEN, Y_SCREEN);					
+		if (collision_2D(player_1, player_2)) 
+		    square_move(player_1, -1, 3, X_SCREEN, Y_SCREEN);					
 	}
 
 	if (player_2->control->left){																				
 		square_move(player_2, 1, 0, X_SCREEN, Y_SCREEN);																																				
-		if (collision_2D(player_2, player_1)) square_move(player_2, -1, 0, X_SCREEN, Y_SCREEN);																											
+		if (collision_2D(player_2, player_1)) 
+		    square_move(player_2, -1, 0, X_SCREEN, Y_SCREEN);																											
 	}
 	
 	if (player_2->control->right){ 																																										
 		square_move(player_2, 1, 1, X_SCREEN, Y_SCREEN);																																				
-		if (collision_2D(player_2, player_1)) square_move(player_2, -1, 1, X_SCREEN, Y_SCREEN);	
+		if (collision_2D(player_2, player_1)) 
+		    square_move(player_2, -1, 1, X_SCREEN, Y_SCREEN);	
 	}																									
 	if (player_2->control->up){																																											
 		square_move(player_2, 1, 2, X_SCREEN, Y_SCREEN);																																				
-		if (collision_2D(player_2, player_1)) square_move(player_2, -1, 2, X_SCREEN, Y_SCREEN);																														
+		if (collision_2D(player_2, player_1)) 
+		    square_move(player_2, -1, 2, X_SCREEN, Y_SCREEN);																														
 	}
 	if (player_2->control->down){																																										
 		square_move(player_2, 1, 3, X_SCREEN, Y_SCREEN);																																				
-		if (collision_2D(player_2, player_1)) square_move(player_2, -1, 3, X_SCREEN, Y_SCREEN);																											
+		if (collision_2D(player_2, player_1)) 
+		    square_move(player_2, -1, 3, X_SCREEN, Y_SCREEN);																											
 	}
 }
 
@@ -69,16 +78,23 @@ int main(){
 	ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);																																				
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();																									
 	ALLEGRO_FONT* font = al_create_builtin_font();																												
-	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);																	
+	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);		
+	if(!timer || !queue || !font || !disp)
+		return -1 ;															
 
 	al_register_event_source(queue, al_get_keyboard_event_source());																									
 	al_register_event_source(queue, al_get_display_event_source(disp));																															
 	al_register_event_source(queue, al_get_timer_event_source(timer));																																	
 
-	square* player_1 = square_create(20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);																										
-	if (!player_1) return 1;																																										
-	square* player_2 = square_create(20, X_SCREEN-10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);												
-	if (!player_2) return 2;																																											
+	square* player_1 = square_create(20, 20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);																										
+	if (!player_1) 
+	    return 1;																																										
+	square* player_2 = square_create(100, 20, X_SCREEN/2, Y_SCREEN/2, X_SCREEN, Y_SCREEN);												
+	if (!player_2) 
+	    return 2;
+	square* floor = square_create(X_SCREEN, 200, X_SCREEN/2, Y_SCREEN -200, X_SCREEN, Y_SCREEN);																																							
+	if (!floor) 
+	    return 3;
 
 	ALLEGRO_EVENT event;																																												
 	al_start_timer(timer);																																												
@@ -88,8 +104,15 @@ int main(){
 		if (event.type == 30){
 			update_position(player_1, player_2);																																						
 			al_clear_to_color(al_map_rgb(0, 0, 0));																																	
-			al_draw_filled_rectangle(player_1->x-player_1->side/2, player_1->y-player_1->side/2, player_1->x+player_1->side/2, player_1->y+player_1->side/2, al_map_rgb(255, 0, 0));					
-			al_draw_filled_rectangle(player_2->x-player_2->side/2, player_2->y-player_2->side/2, player_2->x+player_2->side/2, player_2->y+player_2->side/2, al_map_rgb(0, 0, 255));					
+			al_draw_filled_rectangle(player_1->x -player_1->xside/2, player_1->y -player_1->yside/2,
+				                     player_1->x +player_1->xside/2, player_1->y +player_1->yside/2,
+									 al_map_rgb(255, 0, 0));					
+			al_draw_filled_rectangle(player_2->x -player_2->xside/2, player_2->y -player_2->yside/2,
+				                     player_2->x +player_2->xside/2, player_2->y +player_2->yside/2, 
+									 al_map_rgb(0, 255, 0));					
+			al_draw_filled_rectangle(floor->x -floor->xside/2, floor->y -floor->yside/2,
+				                     floor->x +floor->xside/2, floor->y +floor->yside/2, 
+									 al_map_rgb(0, 255, 0));					
     		al_flip_display();																																							
 		}
 		else if ((event.type == 10) || (event.type == 12)) {
