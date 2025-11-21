@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "Joystick.h"
+#include "joystick.h"
 
 joystick* joystick_create(){
 
