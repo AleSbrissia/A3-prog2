@@ -10,12 +10,13 @@
 #include "fase.h"
 
 int main(){
+
 	al_init();	
 	al_init_primitives_addon();	
-
+	al_init_font_addon() ;
 	al_install_keyboard();
 
-	ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);	
+	ALLEGRO_TIMER* timer = al_create_timer(1.0 / FPS);	
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();	
 	ALLEGRO_FONT* font = al_create_builtin_font();	
 	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);
@@ -30,7 +31,7 @@ int main(){
 	if (!p1) 
 	    return 1;
 
-	square* floor = square_create(X_SCREEN, 200, X_SCREEN/2, Y_SCREEN -200, X_SCREEN, Y_SCREEN);
+	square* floor = square_create(X_SCREEN, Y_GROUND, X_SCREEN/2, Y_SCREEN -Y_GROUND, X_SCREEN, Y_SCREEN);
 	if (!floor) 
 	    return 3;
 
@@ -48,10 +49,8 @@ int main(){
 		{
 			case ALLEGRO_EVENT_TIMER :
                 
-			    if(estado == GAMEPLAY) {
-					draw_gameplay(p1, floor) ;	
-				}
-                al_flip_display() ;
+			    player_update_movement(p1, 1.0/FPS, floor) ;
+				redraw = true ;
 			break;
 
 			case ALLEGRO_EVENT_KEY_DOWN :
@@ -101,6 +100,7 @@ int main(){
 				if (event.keyboard.keycode == 19)
 					joystick_down(p1->control);	
 				
+				redraw = true ;
 			break ;
 			
 
@@ -122,7 +122,7 @@ int main(){
 				break;
 
 				case GAMEPLAY : 
-					draw_game(p1, floor) ;
+					draw_gameplay(p1, floor) ;
 
 				break;
 			}

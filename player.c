@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "player.h"
 #include "joystick.h"
+#include "game.h"
+#include "fase.h"
 
 player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){						
 
@@ -43,4 +46,52 @@ void player_move(player *element, char steps, int trajectory, int max_x, int max
 void square_destroy(player *element){
 	joystick_destroy(element->control);	
 	free(element);
+}
+
+
+// Atualiza o movimento e estado do jogador com base nos controles
+void player_update_movement(player *p, float dt, square *floor) {
+
+    if (!p)
+		return;
+
+	//const float move_dist = PLAYER_SPEED_PER_SEC * dt;
+	int move_dist = PLAYER_STEP ;
+
+    // --- LÓGICA DE MOVIMENTO FÍSICO ---
+    // Apenas atualiza a posição e a direção do jogador
+    if (p->control->right) {
+        p->x += move_dist;
+    } else if (p->control->left) {
+        p->x -= move_dist;
+    }
+    if (p->x < p->w/2) {
+        p->x = p->w/2;
+    }
+    if (p->control->up && p->ground) {
+        p->fall = PLAYER_JUMP;
+        p->ground = false;
+    }
+    if (!p->ground) {
+        p->fall += GRAVITY;
+        p->y += p->fall;
+        if (p->y >= Y_GROUND) {
+            p->y = Y_GROUND;
+            p->fall = 0;
+            p->ground = true;
+        }
+    }
+
+    // --- ESCOLHA DO ESTADO DE ANIMAÇÃO ---
+    /*if (!p->no_chao) { // Lógica no Ar
+        p->estado = PULANDO;
+    } else { // Lógica no Chão
+        if (is_moving) {
+            p->estado = ANDANDO;
+        } else if (controle->down) { // Agachado
+            p->estado =  AGACHADO;
+        } else { // Parado
+            p->estado = PARADO;
+        }
+    }*/
 }

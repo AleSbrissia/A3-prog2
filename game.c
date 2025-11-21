@@ -11,7 +11,7 @@
 #define Y_SCREEN 720
 
 // Checagem AABB simples e correta
-int collision_2D(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
+int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
 
     if ((x1 + w1) < x2)  // 1 está a esquerda 2 
         return 0; 
