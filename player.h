@@ -6,7 +6,7 @@
 #include "fase.h"
 
 #define PLAYER_STEP 10	
-#define PLAYER_JUMP 30	
+#define PLAYER_JUMP -15
 
 typedef struct {
 	int w;

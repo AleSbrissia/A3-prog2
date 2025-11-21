@@ -10,8 +10,8 @@
 
 #define X_SCREEN 1280
 #define Y_SCREEN 720
-#define Y_GROUND 200 
-
+#define Y_GROUND 120 
+#define Y_FLOOR 590 
 #define FPS 30.0 
 
 #define GRAVITY 0.8f

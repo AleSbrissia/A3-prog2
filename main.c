@@ -27,13 +27,21 @@ int main(){
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
-	player* p1 = player_create(20, 20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);
-	if (!p1) 
-	    return 1;
+    /* escolha do tamanho do jogador */
+	int player_w = 20;
+	int player_h = 20;
+	int player_start_x = 10;
 
-	square* floor = square_create(X_SCREEN, Y_GROUND, X_SCREEN/2, Y_SCREEN -Y_GROUND, X_SCREEN, Y_SCREEN);
-	if (!floor) 
-	    return 3;
+	/* floor/ground definido pela constante Y_GROUND (altura) */
+	int floor_h = Y_GROUND;
+	int floor_center_y = Y_SCREEN - floor_h / 2;
+
+	/* criar jogador já posicionado em cima do chão */
+	int player_start_y = Y_FLOOR ; // floor_top - player_h/2
+
+	player* p1 = player_create(player_w, player_h, player_start_x, player_start_y, X_SCREEN, Y_SCREEN);
+	/* criar o objeto chão com centro calculado */
+	square* floor = square_create(X_SCREEN, floor_h, X_SCREEN/2, floor_center_y, X_SCREEN, Y_SCREEN);
 
 	al_start_timer(timer);
     game_state estado = MENU ;
@@ -49,7 +57,10 @@ int main(){
 		{
 			case ALLEGRO_EVENT_TIMER :
                 
-			    player_update_movement(p1, 1.0/FPS, floor) ;
+				if(estado == GAMEPLAY) {
+					player_update_movement(p1, 1.0/FPS, floor) ;
+
+				}
 				redraw = true ;
 			break;
 
@@ -75,7 +86,9 @@ int main(){
 						else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 							if (menu_select == 1) {
 								// Cria os objetos do jogo ao iniciar
-								if (!p1) p1 = player_create(20, 20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);
+								if (!p1) 
+								    p1 = player_create(20, 20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);
+
 								estado = GAMEPLAY;
 						} else {
 							done = true;
@@ -100,7 +113,6 @@ int main(){
 				if (event.keyboard.keycode == 19)
 					joystick_down(p1->control);	
 				
-				redraw = true ;
 			break ;
 			
 
