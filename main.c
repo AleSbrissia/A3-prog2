@@ -48,16 +48,16 @@ int main() {
 			return -1 ;
 	}
 
-	int floor_center_y = Y_SCREEN - H_GROUND / 2 ;
-	int player_start_y = Y_FLOOR - PLAYER_H / 2 ; // floor_top - player_h/2
+	player* p1 = NULL ;
+	square* floor = NULL ;
+    obstacle_manager* obs_manager = NULL ;
 
-	player* p1 = player_create(PLAYER_W, PLAYER_H, PLAYER_START_X, player_start_y, X_SCREEN, Y_SCREEN);
-	square* floor = square_create(X_SCREEN, H_GROUND, X_SCREEN/2, floor_center_y, X_SCREEN, Y_SCREEN);
+    game_set(&p1, &floor, &obs_manager) ;
+	if(!p1 || !floor || !obs_manager){
 
-    obstacle_manager* obs_manager = obstacle_manager_create(5, 2.0f, 1.0f) ;
-
-	if(!p1 || !floor)
+		fprintf(stderr, "nao alocou\n") ;
 		return -1 ;
+	}
 
 	al_start_timer(timer);
     game_state estado = MENU ;
@@ -75,11 +75,11 @@ int main() {
                 
 				if(estado == GAMEPLAY) {
 					player_update_movement(p1, 1.0/FPS, floor) ;
-					obstacle_manager_update(obs_manager, 1.0/FPS, p1, X_SCREEN) ;
+					obstacle_manager_update(obs_manager, 1.0/FPS, p1, X_SCREEN, Y_FLOOR, GRAVITY) ;
 
 					if(p1->health == 0) {
 						p1->alive = false ;
-						done = true ;
+						estado = GAMEOVER ;
 					}
 				}
 				redraw = true ;
@@ -102,36 +102,53 @@ int main() {
 							menu_select = 2;
 						else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 							if (menu_select == 1) {
-								// Cria os objetos do jogo ao iniciar
-								if (!p1) 
-								    return -1 ;//p1 = player_create(20, 20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN);
-
 								estado = GAMEPLAY;
 							} 
 							else {
 								done = true;
 							}
 						}
-						break;
+					break;
+
+					case GAMEOVER :
+
+						if (event.keyboard.keycode == ALLEGRO_KEY_UP) 
+						    menu_select = 1;
+						else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) 
+							menu_select = 2;
+						else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+							if (menu_select == 1) {
+
+								obstacle_manager_reset_all(obs_manager, X_SCREEN, Y_FLOOR) ;
+								game_clean(p1, floor, obs_manager) ;
+								game_set(&p1, &floor, &obs_manager) ;
+								estado = GAMEPLAY;
+							} 
+							else {
+								done = true;
+							}
+						}
+					break;
+
 						
-						redraw = true ;
-					}
+					redraw = true ;
+				}
 
-				break;
+			break;
 
-				case ALLEGRO_EVENT_KEY_UP :
-					wasd_keys(p1, &event) ;
-					
-				break ;
+			case ALLEGRO_EVENT_KEY_UP :
+				wasd_keys(p1, &event) ;
+				
+			break ;
 
-				case ALLEGRO_EVENT_DISPLAY_CLOSE :
-					done = true ;
-				break ;
+			case ALLEGRO_EVENT_DISPLAY_CLOSE :
+				done = true ;
+			break ;
 			
-			}
+		}
 			
-			//desenho 
-			if (redraw && al_is_event_queue_empty(queue)) {
+		//desenho 
+		if (redraw && al_is_event_queue_empty(queue)) {
 			redraw = false ;
 
 			switch (estado)
@@ -139,6 +156,12 @@ int main() {
 				case MENU:
 					al_clear_to_color(al_map_rgb(0, 0, 0));
 					draw_menu(game_bg_img, font, menu_select) ;
+				
+				break;
+
+				case GAMEOVER:
+					al_clear_to_color(al_map_rgb(0, 0, 0));
+					draw_gameover(game_bg_img, font, menu_select) ;
 				
 				break;
 

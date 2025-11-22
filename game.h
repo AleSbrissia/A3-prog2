@@ -6,6 +6,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 
+#include "obstacle.h"
 #include "player.h"
 #include "fase.h"
 
@@ -23,12 +24,17 @@
 
 typedef enum {
     MENU,
-    GAMEPLAY
+    GAMEPLAY,
+    GAMEOVER
+
 } game_state;
 
 void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt)  ;
+void draw_gameover(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) ;
 void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) ; 
 int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) ;
 int wasd_keys(player *p1, ALLEGRO_EVENT *ev) ;
+int game_set(player **p, square **floor, obstacle_manager **obs_manager) ;
+int game_clean(player *p, square *floor, obstacle_manager *obs_manager) ;
 
-#endif 
+#endif

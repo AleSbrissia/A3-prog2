@@ -1,7 +1,6 @@
 #ifndef FASE_H
 #define FASE_H
 
-
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -38,19 +38,19 @@ void obstacle_destroy(obstacle* obs) {
     }
 }
 
-void obstacle_reset(obstacle* obs, int screen_width) {
+void obstacle_reset(obstacle* obs, int screen_width, int y_floor) {
     if (!obs) return;
     
     // Reposiciona o obstáculo à direita da tela com variação aleatória
     obs->x = screen_width + (rand() % 200) + 100;
-    obs->y = Y_FLOOR - obs->h/2; // Posiciona no chão
+    obs->y = y_floor - obs->h/2; // Posiciona no chão
     obs->active = true;
     
     // Variação na velocidade para tornar mais interessante
     obs->speed_x = -((rand() % 3) + 2); // Velocidade entre -2 e -4
 }
 
-int obstacle_update_movement(obstacle* obs, int screen_width) {
+int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int gravity) {
     if (!obs || !obs->active) return 0;
 
     // Movimento horizontal com rolling background
@@ -58,18 +58,18 @@ int obstacle_update_movement(obstacle* obs, int screen_width) {
 
     // Reset quando sair da tela pela esquerda
     if (obs->x + obs->w/2 < 0) {
-        obstacle_reset(obs, screen_width);
+        obstacle_reset(obs, screen_width, y_floor);
         return 1; // Obstáculo resetado
     }
 
     // Física de gravidade se aplicável
     if (obs->speed_y != 0) {
-        obs->speed_y += GRAVITY;
+        obs->speed_y += gravity;
         obs->y += obs->speed_y;
         
         // Colisão com o chão
-        if (obs->y + obs->h/2 >= Y_FLOOR) {
-            obs->y = Y_FLOOR - obs->h/2;
+        if (obs->y + obs->h/2 >= y_floor) {
+            obs->y = y_floor - obs->h/2;
             obs->speed_y = 0;
             return 2; // Obstáculo no chão
         }
@@ -136,7 +136,7 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     return manager;
 }
 
-void obstacle_manager_update(obstacle_manager* manager, float delta_time, player* player, int screen_width) {
+void obstacle_manager_update(obstacle_manager* manager, float delta_time, player* player, int screen_width, int y_floor, int gravity) {
     if (!manager) return;
     
     manager->spawn_timer += delta_time;
@@ -163,7 +163,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 
                 manager->obstacles[i] = obstacle_create(
                     screen_width + 100, 
-                    Y_FLOOR - height/2, 
+                    y_floor - height/2, 
                     width, height, 
                     -((rand() % 3) + 2), // Velocidade aleatória
                     0, 
@@ -179,7 +179,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
     // Atualiza obstáculos ativos e verifica colisões
     for (int i = 0; i < manager->max_obstacles; i++) {
         if (manager->obstacles[i] && manager->obstacles[i]->active) {
-            obstacle_update_movement(manager->obstacles[i], screen_width);
+            obstacle_update_movement(manager->obstacles[i], screen_width, y_floor, gravity);
             
             // Verifica colisão com player
             if (obstacle_check_collision(manager->obstacles[i], player)) {
@@ -218,12 +218,12 @@ void obstacle_manager_destroy(obstacle_manager* manager) {
     free(manager);
 }
 
-void obstacle_manager_reset_all(obstacle_manager* manager, int screen_width) {
+void obstacle_manager_reset_all(obstacle_manager* manager, int screen_width, int y_floor) {
     if (!manager) return;
     
     for (int i = 0; i < manager->max_obstacles; i++) {
         if (manager->obstacles[i]) {
-            obstacle_reset(manager->obstacles[i], screen_width);
+            obstacle_reset(manager->obstacles[i], screen_width, y_floor);
         }
     }
     manager->spawn_timer = 0;
