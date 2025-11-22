@@ -29,11 +29,12 @@ typedef struct {
 } obstacle_manager;
 
 typedef enum {
-    log,
+    stem,
     arrow,
     spike,
+    stone
     
-}
+}obstacle_type;
 
 // Funções básicas do obstáculo
 obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, const char* sprite_path);

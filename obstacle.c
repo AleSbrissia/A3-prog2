@@ -138,7 +138,9 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
 
 void obstacle_manager_update(obstacle_manager* manager, float delta_time, player* player, int screen_width, int y_floor, int gravity) {
 
-    int obstacle_type, width, height, i;
+    obstacle_type obs_type ; 
+    ALLEGRO_BITMAP *sprite = NULL ;
+    int width, height, i, aleat;
                 
     if (!manager) return;
     
@@ -154,13 +156,14 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 }
                 
                 // Aleatoriza tipo/tamanho do obstáculo
-                obstacle_type = rand() % 3;
+                aleat = rand() % 3;
                 
-                switch (obstacle_type) {
-                    case 0: 
+                obs_type = aleat ;
+                
+                switch (obs_type) {
+                    case stem: 
                         width = 20; height = 30; 
                     break; 
-
 
                     case 1: width = 30; height = 40; break; // Médio  
                     case 2: width = 25; height = 35; break; // Outro
