@@ -21,6 +21,10 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
 	new_player->y = y;	
 	new_player->ground = true;	
 	new_player->fall = 0 ;
+
+    new_player->max_health = 1 ;
+	new_player->health = new_player->max_health ;
+
 	new_player->control = joystick_create();
 	return new_player;
 }
@@ -49,7 +53,6 @@ void player_destroy(player *element){
 	joystick_destroy(element->control);	
 	free(element);
 }
-
 
 // Atualiza o movimento e estado do jogador com base nos controles
 void player_update_movement(player *p, float dt, square *floor) {
@@ -86,8 +89,8 @@ void player_update_movement(player *p, float dt, square *floor) {
     if (!p->ground) {
         p->fall += GRAVITY;
         p->y += p->fall;
-        if (p->y >= Y_FLOOR) {
-            p->y = Y_FLOOR ;
+        if (p->y >= Y_FLOOR -  p->h/2) {
+            p->y = Y_FLOOR - p->h/2;
             p->fall = 0;
             p->ground = true;
         }

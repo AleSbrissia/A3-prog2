@@ -5,12 +5,13 @@
 #include "joystick.h"
 #include "fase.h"
 
-
 #define PLAYER_W 20	
 #define PLAYER_H 40	
 
+#define PLAYER_START_X PLAYER_W/2	
+
 #define PLAYER_STEP 5	
-#define PLAYER_JUMP -10
+#define PLAYER_JUMP -20
 
 typedef struct {
 	int w;
@@ -21,6 +22,8 @@ typedef struct {
 
 	bool ground;
 	float fall;
+
+	int health, max_health ; 
 
 } player;		
 

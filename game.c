@@ -2,11 +2,9 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>	
+#include <allegro5/allegro_image.h>	
 
-#include "player.h"
-#include "fase.h"
 #include "game.h"
-
 
 // Checagem AABB simples e correta
 int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
@@ -23,15 +21,34 @@ int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
     return 1;
 }
 
-void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt) {
+void draw_menu(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
 
     // Obtém dimensões da tela
     int screen_w = al_get_display_width(al_get_current_display());
     int screen_h = al_get_display_height(al_get_current_display());
 
     // Desenhar a imagem de fundo proporcional e centralizada
-        if (bg_image) {
-        // draw_scaled_background(bg_image, 0);
+    if (bg) {
+        int img_w = al_get_bitmap_width(bg);
+        int img_h = al_get_bitmap_height(bg);
+
+        
+        // Calcula a escala para preencher a tela mantendo a proporção
+        float scale_x = (float)screen_w / img_w;
+        float scale_y = (float)screen_h / img_h;
+        float scale = (scale_x > scale_y) ? scale_x : scale_y; // Preenche toda a tela
+        
+        float draw_w = img_w * scale;
+        float draw_h = img_h * scale;
+        
+        // Centraliza a imagem na tela
+        float draw_x = (screen_w - draw_w) / 2;
+        float draw_y = (screen_h - draw_h) / 2;
+        
+        al_draw_scaled_bitmap(bg, 0, 0, img_w, img_h, 
+                              draw_x, draw_y, draw_w, draw_h, 0);
+        
+        // Calcula quantas cópias precisamos para cobrir a tela + margem
     } else {
         // Fallback: fundo preto
         al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -68,7 +85,6 @@ void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt) {
 }
 
 void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
-    al_clear_to_color(al_map_rgb(0, 0, 0));
     
     if (bg) {
         int img_w = al_get_bitmap_width(bg);
@@ -97,7 +113,7 @@ void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
         }
     }
 
-    // Desenha o player e o chão (sem mudanças)
+    // Desenha o player 
     al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
                             p->x + p->w/2, p->y + p->h/2,
                             al_map_rgb(255, 0, 0));
