@@ -32,7 +32,6 @@ void draw_menu(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
         int img_w = al_get_bitmap_width(bg);
         int img_h = al_get_bitmap_height(bg);
 
-        
         // Calcula a escala para preencher a tela mantendo a proporção
         float scale_x = (float)screen_w / img_w;
         float scale_y = (float)screen_h / img_h;
@@ -48,7 +47,6 @@ void draw_menu(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
         al_draw_scaled_bitmap(bg, 0, 0, img_w, img_h, 
                               draw_x, draw_y, draw_w, draw_h, 0);
         
-        // Calcula quantas cópias precisamos para cobrir a tela + margem
     } else {
         // Fallback: fundo preto
         al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -112,6 +110,7 @@ void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
                                  -scroll_x + (i * draw_w), 0, draw_w, draw_h, 0);
         }
     }
+    player_draw_health(p) ;
 
     // Desenha o player 
     al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
@@ -120,4 +119,23 @@ void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
     /*al_draw_filled_rectangle(floor->x - floor->w/2, floor->y - floor->h/2,
                             floor->x + floor->w/2, floor->y + floor->h/2, 
                             al_map_rgb(0, 255, 0));*/
+}
+
+int wasd_keys(player *p1, ALLEGRO_EVENT *ev){
+    
+    if(!p1 || !p1->control)
+        return -1 ;
+
+    ALLEGRO_EVENT event = *ev;
+
+    if (event.keyboard.keycode == 1) 
+        joystick_left(p1->control);
+    else if (event.keyboard.keycode == 4) 
+        joystick_right(p1->control);	
+    else if (event.keyboard.keycode == 23) 
+        joystick_up(p1->control);
+    else if (event.keyboard.keycode == 19)
+        joystick_down(p1->control);	
+
+    return 0 ; 
 }

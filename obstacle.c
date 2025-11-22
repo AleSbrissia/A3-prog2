@@ -183,7 +183,13 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
             
             // Verifica colisão com player
             if (obstacle_check_collision(manager->obstacles[i], player)) {
-                printf("COLISÃO DETECTADA! Game Over?\n");
+
+                if (player->damage_dalay == 0) {
+
+                    player->health-- ;
+                    player->damage_dalay = PLAYER_DAMAGE_DALAY ;
+                }
+
                 // Aqui você pode implementar lógica de game over ou dano
             }
         }

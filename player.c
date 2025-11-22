@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <allegro5/allegro_primitives.h>	
 
 #include "player.h"
 #include "joystick.h"
@@ -22,8 +23,10 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
 	new_player->ground = true;	
 	new_player->fall = 0 ;
 
-    new_player->max_health = 1 ;
+    new_player->max_health = PLAYER_MAX_HEALTH ;
 	new_player->health = new_player->max_health ;
+	new_player->alive = true ;
+	new_player->damage_dalay = 0 ;
 
 	new_player->control = joystick_create();
 	return new_player;
@@ -65,6 +68,9 @@ void player_update_movement(player *p, float dt, square *floor) {
 	//const float move_dist = PLAYER_SPEED_PER_SEC * dt;
 	int move_dist = PLAYER_STEP ;
 
+	if(p->damage_dalay != 0)
+		p->damage_dalay-- ;
+
     // --- LÓGICA DE MOVIMENTO FÍSICO ---
     // Apenas atualiza a posição e a direção do jogador
     if (p->control->right) {
@@ -96,4 +102,32 @@ void player_update_movement(player *p, float dt, square *floor) {
         }
     }
 }
+
+// Função alternativa para desenhar corações
+void player_draw_health(player *p) {
+    if (!p) return;
+    
+    int start_x = HEALTH_BAR_X;
+    int start_y = HEALTH_BAR_Y;
+    
+    for (int i = 0; i < p->max_health; i++) {
+        int x = start_x + i * (HEALTH_BAR_W + HEALTH_BAR_SPACE);
+        int y = start_y;
+        
+        ALLEGRO_COLOR fill_color, border_color;
+        
+        if (i < p->health) {
+            fill_color = al_map_rgb(255, 0, 0);    // Vermelho - vida cheia
+            border_color = al_map_rgb(200, 0, 0);  // Vermelho escuro
+        } else {
+            fill_color = al_map_rgb(60, 60, 60);   // Cinza - vida vazia
+            border_color = al_map_rgb(100, 100, 100); // Cinza escuro
+        }
+        
+        // Desenha um "coração" simplificado (losango)
+        al_draw_filled_rectangle(x, y, x + HEALTH_BAR_W, y + HEALTH_BAR_H, fill_color);
+        al_draw_rectangle(x, y, x + HEALTH_BAR_W, y + HEALTH_BAR_H, border_color, 2);
+    }
+}
+
 

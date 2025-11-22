@@ -16,7 +16,7 @@
 
 #define FPS 30.0 
 
-#define GRAVITY 0.8f
+#define GRAVITY 1.2f
 
 #define MAX_OBSTACLES 5
 #define OBSTACLE_SPAWN_INTERVAL 2.0f
@@ -29,5 +29,6 @@ typedef enum {
 void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt)  ;
 void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) ; 
 int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) ;
+int wasd_keys(player *p1, ALLEGRO_EVENT *ev) ;
 
 #endif 

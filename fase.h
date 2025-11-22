@@ -6,10 +6,7 @@
 #include <stdlib.h>
 
 typedef struct {
-	int w ;
-	int h; 
-	int x ;
-	int y ;
+	int w, h, x, y ;
 }square ;
 
 
