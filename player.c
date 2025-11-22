@@ -45,7 +45,7 @@ void player_move(player *element, char steps, int trajectory, int max_x, int max
 	}
 }
 
-void square_destroy(player *element){
+void player_destroy(player *element){
 	joystick_destroy(element->control);	
 	free(element);
 }
@@ -54,8 +54,10 @@ void square_destroy(player *element){
 // Atualiza o movimento e estado do jogador com base nos controles
 void player_update_movement(player *p, float dt, square *floor) {
 
-    if (!p)
+    if (!p || !p->control) {
+		fprintf(stderr, "NULL pointer player_update \n") ;
 		return;
+	}
 
 	//const float move_dist = PLAYER_SPEED_PER_SEC * dt;
 	int move_dist = PLAYER_STEP ;
@@ -70,6 +72,13 @@ void player_update_movement(player *p, float dt, square *floor) {
     if (p->x < p->w/2) {
         p->x = p->w/2;
     }
+	if (p->x + p->w/2 > X_SCREEN) {
+		p->x = X_SCREEN - p->w/2;  // Encosta na borda direita
+    }
+    if (p->y - p->h/2 < 0) {
+        p->y = p->h/2;  // Encosta no topo
+    }
+
     if (p->control->up && p->ground) {
         p->fall = PLAYER_JUMP;
         p->ground = false;
@@ -84,90 +93,4 @@ void player_update_movement(player *p, float dt, square *floor) {
         }
     }
 }
-/*void player_update_movement(player *p, float dt, square *floor) {
-    if (!p) return;
-
-    // horizontal input -> dx (per frame). Use PLAYER_STEP as step per tick.
-    int dx = 0;
-    if (p->control) {
-        if (p->control->right) dx += PLAYER_STEP;
-        if (p->control->left)  dx -= PLAYER_STEP;
-    }
-
-    // --- Horizontal movement + collision resolution on X ---
-    if (dx != 0) {
-        int new_x = p->x + dx;
-
-        // move on X
-        p->x = new_x;
-
-        // if collide with floor horizontally, resolve by pushing out on X
-        if (floor && collision(p->x, p->y, p->w, p->h, floor->x, floor->y, floor->w, floor->h)) {
-            if (dx > 0) {
-                // moving right -> place player to left of floor
-                int floor_left = floor->x - floor->w/2;
-                p->x = floor_left - p->w/2;
-            } else if (dx < 0) {
-                // moving left -> place player to right of floor
-                int floor_right = floor->x + floor->w/2;
-                p->x = floor_right + p->w/2;
-            }
-        }
-    }
-
-    // --- Vertical movement (gravity + jump) ---
-    // jump: when pressing up and standing on ground
-    if (p->control && p->control->up && p->ground) {
-        p->fall = -PLAYER_JUMP; // upward impulse (negative = up)
-        p->ground = false;
-    }
-
-    // apply gravity to vertical velocity
-    p->fall += GRAVITY;          // GRAVITY should be positive (pulls down)
-    // integrate vertical movement
-    int new_y = (int) (p->y + p->fall);
-
-    // Move on Y
-    p->y = new_y;
-
-    // check collision with floor after vertical move
-    if (floor && collision(p->x, p->y, p->w, p->h, floor->x, floor->y, floor->w, floor->h)) {
-        // if we were falling (positive fall), land on top
-        int floor_top = floor->y - floor->h/2;
-        int floor_bottom = floor->y + floor->h/2;
-        int player_top = p->y - p->h/2;
-        int player_bottom = p->y + p->h/2;
-
-        if (p->fall > 0) {
-            // landed on top of floor
-            p->y = floor_top - p->h/2;
-            p->fall = 0;
-            p->ground = true;
-        } else if (p->fall < 0) {
-            // hit head on bottom of floor -> place below
-            p->y = floor_bottom + p->h/2;
-            p->fall = 0;
-            // remain airborne (ground=false)
-            p->ground = false;
-        } else {
-            // zero vertical velocity but overlapping: push up
-            p->y = floor_top - p->h/2;
-            p->ground = true;
-        }
-    } else {
-        // if not colliding with floor, player is airborne
-        p->ground = false;
-    }
-
-    // clamp to screen bounds (optional)
-    if (p->x - p->w/2 < 0) p->x = p->w/2;
-    if (p->x + p->w/2 > X_SCREEN) p->x = X_SCREEN - p->w/2;
-    if (p->y - p->h/2 < 0) p->y = p->h/2;
-    if (p->y + p->h/2 > Y_SCREEN) {
-        p->y = Y_SCREEN - p->h/2;
-        p->fall = 0;
-        p->ground = true;
-    }
-}*/
-
 

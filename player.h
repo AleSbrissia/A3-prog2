@@ -1,12 +1,16 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef _PLAYER_H_
+#define _PLAYER_H_
 
 #include <stdbool.h>
 #include "joystick.h"
 #include "fase.h"
 
-#define PLAYER_STEP 10	
-#define PLAYER_JUMP -15
+
+#define PLAYER_W 20	
+#define PLAYER_H 40	
+
+#define PLAYER_STEP 5	
+#define PLAYER_JUMP -10
 
 typedef struct {
 	int w;

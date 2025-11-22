@@ -7,8 +7,6 @@
 #include "fase.h"
 #include "game.h"
 
-#define X_SCREEN 1280											
-#define Y_SCREEN 720
 
 // Checagem AABB simples e correta
 int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
@@ -25,22 +23,6 @@ int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
     return 1;
 }
 
-//nao conta colisao
-void update_position(player *player_1){
-    if (!player_1) return;
-
-    /* cópias temporárias para calcular posições pretendidas usando square_move */
-    player temp1 = *player_1;
-
-    /* aplicar movimentos pretendidos nas cópias (preserva validações de square_move) */
-    if (player_1->control){
-        if (player_1->control->left)  player_move(&temp1, 1, 0, X_SCREEN, Y_SCREEN);
-        if (player_1->control->right) player_move(&temp1, 1, 1, X_SCREEN, Y_SCREEN);
-        if (player_1->control->up)    player_move(&temp1, 1, 2, X_SCREEN, Y_SCREEN);
-        if (player_1->control->down)  player_move(&temp1, 1, 3, X_SCREEN, Y_SCREEN);
-    }
-}
-
 void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt) {
 
     // Obtém dimensões da tela
@@ -48,7 +30,7 @@ void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt) {
     int screen_h = al_get_display_height(al_get_current_display());
 
     // Desenhar a imagem de fundo proporcional e centralizada
-    if (bg_image) {
+        if (bg_image) {
         // draw_scaled_background(bg_image, 0);
     } else {
         // Fallback: fundo preto
@@ -85,14 +67,41 @@ void draw_menu(ALLEGRO_BITMAP* bg_image, ALLEGRO_FONT *font, int selected_opt) {
 
 }
 
-void draw_gameplay(player *p, square *floor) {
-    update_position(p);
+void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
     al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_filled_rectangle(p->x -p->w/2, p->y -p->h/2,
-                            p->x +p->w/2, p->y +p->h/2,
+    
+    if (bg) {
+        int img_w = al_get_bitmap_width(bg);
+        int img_h = al_get_bitmap_height(bg);
+        int disp_w = al_get_display_width(al_get_current_display());
+        int disp_h = al_get_display_height(al_get_current_display());
+        
+        // Escala para preencher a altura da tela
+        float scale = (float)disp_h / img_h;
+        float draw_w = img_w * scale;
+        float draw_h = img_h * scale;
+        
+        // Calcula quantas cópias precisamos para cobrir a tela + margem
+        int copies_needed = (disp_w / draw_w) + 2;
+        
+        // Calcula a posição de scroll baseada na posição do player
+        float scroll_x = fmod(p->x * 0.3f, draw_w);
+        
+        // Garante que o scroll seja positivo
+        if (scroll_x < 0) scroll_x += draw_w;
+        
+        // Desenha múltiplas cópias para criar o efeito infinito
+        for (int i = 0; i < copies_needed; i++) {
+            al_draw_scaled_bitmap(bg, 0, 0, img_w, img_h, 
+                                 -scroll_x + (i * draw_w), 0, draw_w, draw_h, 0);
+        }
+    }
+
+    // Desenha o player e o chão (sem mudanças)
+    al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
+                            p->x + p->w/2, p->y + p->h/2,
                             al_map_rgb(255, 0, 0));
-    al_draw_filled_rectangle(floor->x -floor->w/2, floor->y -floor->h/2,
-                            floor->x +floor->w/2, floor->y +floor->h/2, 
-                            al_map_rgb(0, 255, 0));
-    al_flip_display();
+    /*al_draw_filled_rectangle(floor->x - floor->w/2, floor->y - floor->h/2,
+                            floor->x + floor->w/2, floor->y + floor->h/2, 
+                            al_map_rgb(0, 255, 0));*/
 }
