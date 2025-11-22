@@ -137,13 +137,16 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
 }
 
 void obstacle_manager_update(obstacle_manager* manager, float delta_time, player* player, int screen_width, int y_floor, int gravity) {
+
+    int obstacle_type, width, height, i;
+                
     if (!manager) return;
     
     manager->spawn_timer += delta_time;
     
     // Spawn de novos obstáculos
     if (manager->spawn_timer >= manager->spawn_interval) {
-        for (int i = 0; i < manager->max_obstacles; i++) {
+        for (i = 0; i < manager->max_obstacles; i++) {
             if (!manager->obstacles[i] || !manager->obstacles[i]->active) {
                 // Cria novo obstáculo se slot vazio ou inativo
                 if (manager->obstacles[i]) {
@@ -151,11 +154,14 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 }
                 
                 // Aleatoriza tipo/tamanho do obstáculo
-                int obstacle_type = rand() % 3;
-                int width, height;
+                obstacle_type = rand() % 3;
                 
                 switch (obstacle_type) {
-                    case 0: width = 20; height = 30; break; // Pequeno
+                    case 0: 
+                        width = 20; height = 30; 
+                    break; 
+
+
                     case 1: width = 30; height = 40; break; // Médio  
                     case 2: width = 25; height = 35; break; // Outro
                     default: width = 24; height = 30; break;

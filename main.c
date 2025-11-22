@@ -51,13 +51,7 @@ int main() {
 	player* p1 = NULL ;
 	square* floor = NULL ;
     obstacle_manager* obs_manager = NULL ;
-
     game_set(&p1, &floor, &obs_manager) ;
-	if(!p1 || !floor || !obs_manager){
-
-		fprintf(stderr, "nao alocou\n") ;
-		return -1 ;
-	}
 
 	al_start_timer(timer);
     game_state estado = MENU ;

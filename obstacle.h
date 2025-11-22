@@ -28,6 +28,13 @@ typedef struct {
     float scroll_speed; // Para rolling background
 } obstacle_manager;
 
+typedef enum {
+    log,
+    arrow,
+    spike,
+    
+}
+
 // Funções básicas do obstáculo
 obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, const char* sprite_path);
 void obstacle_destroy(obstacle* obs);
