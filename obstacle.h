@@ -10,23 +10,7 @@
 #include "fase.h"
 #include "player.h"
 
-typedef struct {
-    int w, h, x, y;
-    float speed_x, speed_y;
-    bool active;
-    ALLEGRO_BITMAP* sprite;
-    ALLEGRO_COLOR color;
-} obstacle;
-
-// Sistema de gerenciamento de múltiplos obstáculos
-typedef struct {
-    obstacle** obstacles;
-    int count;
-    int max_obstacles;
-    float spawn_timer;
-    float spawn_interval;
-    float scroll_speed; // Para rolling background
-} obstacle_manager;
+#define DIFFERENT_OBSTACLES 2
 
 typedef enum {
     stem,
@@ -34,12 +18,33 @@ typedef enum {
     spike,
     stone
     
-}obstacle_type;
+} obstacle_type;
+
+typedef struct {
+    int w, h, x, y;
+    float speed_x, speed_y;
+    bool active;
+    obstacle_type type;
+    ALLEGRO_BITMAP* sprite;
+    ALLEGRO_COLOR color;
+} obstacle;
+
+// Sistema de gerenciamento de múltiplos obstáculos
+typedef struct {
+    obstacle** obstacles;
+    obstacle_sprites** 
+    int count;
+    int max_obstacles;
+    float spawn_timer;
+    float spawn_interval;
+    float scroll_speed; // Para rolling background
+} obstacle_manager;
 
 // Funções básicas do obstáculo
-obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, const char* sprite_path);
+obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, const char* sprite_path) ;
 void obstacle_destroy(obstacle* obs);
 void obstacle_reset(obstacle* obs, int screen_width, int y_floor) ;
+void obstacle_manager_load(ALLEGRO_BITMAP **obs_sprites) ;
 
 // Movimento e colisão
 int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int gravity) ;

@@ -25,7 +25,10 @@ int main() {
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();	
 	ALLEGRO_FONT* font = NULL ;	
 	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);
-    ALLEGRO_BITMAP* game_bg_img = NULL ;
+    ALLEGRO_BITMAP* game_bg_img = al_load_bitmap("assets/bg.png") ;
+    ALLEGRO_BITMAP **obstacles_sprites = NULL ;
+
+    obstacle_manager_load(obstacles_sprites) ;
 
 	if(!timer || !queue || !disp)
 		return -1 ;	
@@ -34,10 +37,9 @@ int main() {
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
-    game_bg_img = al_load_bitmap("assets/bg.png") ;
 	if (!game_bg_img) {
         
-		fprintf(stderr, "NAO TEM BG\n") ;
+		fprintf(stderr, "erro carregamento de sprite\n") ;
 	}
 	font = al_load_font("assets/Daydream.ttf", 36, 0) ;
 	if (!font) {
@@ -51,13 +53,14 @@ int main() {
 	player* p1 = NULL ;
 	square* floor = NULL ;
     obstacle_manager* obs_manager = NULL ;
-    game_set(&p1, &floor, &obs_manager) ;
-
-	al_start_timer(timer);
     game_state estado = MENU ;
 	bool done = false;
 	bool redraw = true ; 
 	int menu_select = 1 ;
+
+    game_set(&p1, &floor, &obs_manager) ;
+
+	al_start_timer(timer);
 
 	while(!done){
 		ALLEGRO_EVENT event;

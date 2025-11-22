@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, const char* sprite_path) {
+obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, const char* sprite_path) {
     obstacle* obs = malloc(sizeof(obstacle));
     if (!obs) return NULL;
     
@@ -15,6 +15,7 @@ obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed
     obs->speed_y = speed_y;
     obs->active = true;
     obs->color = al_map_rgb(0, 255, 0); // Cor padrão verde 
+    obs->type = type ;
     
     // Carregar sprite se fornecido
     if (sprite_path) {
@@ -108,6 +109,9 @@ int draw_obstacle(obstacle* obs) {
                          obs->x + obs->w/2, obs->y + obs->h/2,
                          al_map_rgb(255, 255, 255), 1);*/
     }
+    if(obs->sprite)
+        al_draw_bitmap(obs->sprite, obs->x -obs->w/2, obs->y -obs->h/2, 0) ;
+
     return 0;
 }
 
@@ -141,6 +145,8 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
     obstacle_type obs_type ; 
     ALLEGRO_BITMAP *sprite = NULL ;
     int width, height, i, aleat;
+    const char *arrow_path = "assets/sprites/arrow.png" ;
+    const char *stem_path = "assets/sprites/stem.png" ;
                 
     if (!manager) return;
     
@@ -176,6 +182,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                     width, height, 
                     -((rand() % 3) + 2), // Velocidade aleatória
                     0, 
+                    obs_type,
                     NULL // Sem sprite por enquanto
                 );
                 
@@ -238,3 +245,14 @@ void obstacle_manager_reset_all(obstacle_manager* manager, int screen_width, int
     manager->spawn_timer = 0;
 }
 
+/*DAQUI SAI LEAK*/
+void obstacle_manager_load(ALLEGRO_BITMAP **obs_sprites) {
+
+    obs_sprites = malloc(sizeof(*obs_sprites) * DIFFERENT_OBSTACLES) ;
+    if(!obs_sprites) {
+        fprintf(stderr, "ERRO ALOCAO OBS_MAN_LOAD") ;
+    }
+
+    obs_sprites[0] = al_load_bitmap("assets/sprites/stem.png") ;
+    obs_sprites[1] = al_load_bitmap("assets/sprites/arrow.png") ;
+}
