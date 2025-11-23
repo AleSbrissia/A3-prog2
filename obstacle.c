@@ -126,9 +126,9 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     manager->obstacles_sprites = malloc(sizeof(ALLEGRO_BITMAP*) * DIFFERENT_OBSTACLES);
     
     // Carrega cada sprite
-    manager->obstacles_sprites[stem] = al_load_bitmap("assets/sprites/stem.png");
-    manager->obstacles_sprites[arrow] = al_load_bitmap("assets/sprites/arrow.png"); 
-    manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/stone.png");
+    manager->obstacles_sprites[stem] = al_load_bitmap("assets/sprites/obstacles/stem.png");
+    manager->obstacles_sprites[arrow] = al_load_bitmap("assets/sprites/obstacles/arrow.png"); 
+    manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/obstacles/stone.png");
     
     // Verifica se carregou
     for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {

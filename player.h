@@ -8,6 +8,7 @@
 #define PLAYER_W 50	
 #define PLAYER_H 100	
 #define PLAYER_H_CROUCHED 50	
+#define PLAYER_STATES 1
 
 #define PLAYER_START_X PLAYER_W/2	
 
@@ -43,6 +44,7 @@ typedef struct {
 	bool alive ;
 
 	player_state state;
+	ALLEGRO_BITMAP **sprites; 
 
 } player;		
 

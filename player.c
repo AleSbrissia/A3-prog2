@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <allegro5/allegro_primitives.h>	
+#include <allegro5/allegro5.h>			
+#include <allegro5/allegro_image.h>
 
 #include "player.h"
 #include "joystick.h"
@@ -33,6 +35,20 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
 	new_player->damage_dalay = 0 ;
 
 	new_player->control = joystick_create();
+
+    //implementacao dos sprites
+    new_player->sprites = malloc(sizeof(ALLEGRO_BITMAP*) * PLAYER_STATES);
+    
+    // Carrega cada sprite
+    new_player->sprites[WALKING] = al_load_bitmap("assets/sprites/player/run1.png");
+    
+    // Verifica se carregou
+    for (int i = 0; i < PLAYER_STATES; i++) {
+        if (!new_player->sprites[i]) {
+            printf("ERRO: Não carregou sprite %d\n", i);
+        }
+    }
+
 	return new_player;
 }
 
@@ -151,10 +167,34 @@ void player_draw_health(player *p) {
 void draw_player(player *p) {
     if(!p) return ;
 
-    if (p->state == WALKING)
+
+    if (p->state == WALKING && p->sprites[WALKING]) {
+
+        al_draw_scaled_bitmap(p->sprites[WALKING],
+                             0, 0, 
+                             al_get_bitmap_width(p->sprites[WALKING]),
+                             al_get_bitmap_height(p->sprites[WALKING]),
+                             p->x - p->visual_w/2,
+                             p->y - p->visual_h/2,
+                             p->visual_w,
+                             p->visual_h,
+                             0);
+
+        // Desenha a hitbox (vermelha) e área visual (azul)
+        al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
+                        p->x + p->w/2, p->y + p->h/2,
+                        al_map_rgb(255, 0, 0), 3);  // Hitbox vermelha
+
+        al_draw_rectangle(p->x - p->visual_w/2, p->y - p->visual_h/2,
+                        p->x + p->visual_w/2, p->y + p->visual_h/2,
+                        al_map_rgb(0, 0, 255), 1);  // Área visual azul
+
+    }
+    else 
         al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
                                 p->x + p->w/2, p->y + p->h/2,
                                 al_map_rgb(255, 0, 0));
+
     if (p->state == CROUCHING)
         al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
                                 p->x + p->w/2, p->y + p->h/2,
