@@ -62,7 +62,7 @@ void draw_menu(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
                  screen_w / 2,
                  screen_h / 4,
                  ALLEGRO_ALIGN_CENTER,
-                 "JOGO DO ALEXANDRE");
+                 "FOREST RUN");
 
     // Opção "Iniciar Jogo"
     al_draw_text(font,

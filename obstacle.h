@@ -22,6 +22,7 @@ typedef enum {
 
 typedef struct {
     int w, h, x, y;
+    int visual_w, visual_h ;
     float speed_x, speed_y;
     bool active;
     obstacle_type type;
@@ -41,7 +42,7 @@ typedef struct {
 } obstacle_manager;
 
 // Funções básicas do obstáculo
-obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, ALLEGRO_BITMAP *sprite) ;
+obstacle* obstacle_create(int x, int y, int w, int h, int v_w, int v_h, float speed_x, float speed_y, obstacle_type type, ALLEGRO_BITMAP *sprite) ;
 void obstacle_destroy(obstacle* obs);
 void obstacle_reset(obstacle* obs, int screen_width, int y_floor) ;
 

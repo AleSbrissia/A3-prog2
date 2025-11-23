@@ -3,13 +3,15 @@
 #include <stdio.h>
 #include <time.h>
 
-obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, ALLEGRO_BITMAP *sprite) {
+obstacle* obstacle_create(int x, int y, int w, int h, int v_w, int v_h, float speed_x, float speed_y, obstacle_type type, ALLEGRO_BITMAP *sprite) {
 
     obstacle* obs = malloc(sizeof(obstacle));
     if (!obs) return NULL;
     
     obs->w = w;
     obs->h = h;
+    obs->visual_h = v_h;
+    obs->visual_w = v_w;
     obs->x = x;
     obs->y = y;
     obs->speed_x = speed_x;
@@ -35,7 +37,23 @@ void obstacle_reset(obstacle* obs, int screen_width, int y_floor) {
     
     // Reposiciona o obstáculo à direita da tela com variação aleatória
     obs->x = screen_width + (rand() % 200) + 100;
-    obs->y = y_floor - obs->h/2; // Posiciona no chão
+
+    switch (obs->type) {
+        case arrow:
+            // Flechas spawnam no ar
+            obs->y = y_floor - obs->h/2 - (PLAYER_H/2) - (rand() % 100);
+            break;
+            
+        case stem: break; //mantem mesma altura
+
+        case stone: break;
+        case spike:
+        default:
+            // Outros obstáculos spawnam no chão
+            obs->y = y_floor - obs->h/2;
+            break;
+    }
+
     obs->active = true;
     
     // Variação na velocidade para tornar mais interessante
@@ -87,18 +105,32 @@ int draw_obstacle(obstacle* obs) {
     if (!obs || !obs->active) return -1;
 
     if (obs->sprite) {
-        // Desenha sprite centralizado
-        al_draw_bitmap(obs->sprite, obs->x - obs->w/2, obs->y - obs->h/2, 0);
+        // Obtém as dimensões reais do sprite
+ 
+        al_draw_scaled_bitmap(obs->sprite,
+                             0, 0, 
+                             al_get_bitmap_width(obs->sprite),
+                             al_get_bitmap_height(obs->sprite),
+                             obs->x - obs->visual_w/2,
+                             obs->y - obs->visual_h/2,
+                             obs->visual_w,
+                             obs->visual_h,
+                             0);
+        
+        // DEBUG: Desenha a hitbox (remova depois de testar)
+        al_draw_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
+                         obs->x + obs->w/2, obs->y + obs->h/2,
+                         al_map_rgb(255, 0, 0), 2);
+
+        al_draw_rectangle(obs->x - obs->visual_w/2, obs->y - obs->visual_h/2,
+                obs->x + obs->visual_w/2, obs->y + obs->visual_h/2,
+                al_map_rgb(0, 0, 255), 1);  // Área visual azul
+                         
     } else {
         // Fallback: desenha retângulo
         al_draw_filled_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
                                obs->x + obs->w/2, obs->y + obs->h/2,
                                obs->color);
-        
-        // Borda para melhor visualização
-        /*al_draw_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
-                         obs->x + obs->w/2, obs->y + obs->h/2,
-                         al_map_rgb(255, 255, 255), 1);*/
     }
 
     return 0;
@@ -147,7 +179,8 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
 
     obstacle_type obs_type ; 
     ALLEGRO_BITMAP *sprite = NULL ;
-    int width, height, i, aleat;
+    int i, aleat, width, height, spawn_x, spawn_y;
+    int visual_w, visual_h;
                 
     if (!manager) return;
     
@@ -163,33 +196,44 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 }
                 
                 // Aleatoriza tipo/tamanho do obstáculo
-                //aleat = rand() % DIFFERENT_OBSTACLES;
-                //obs_type = aleat ;
+                aleat = rand() % DIFFERENT_OBSTACLES;
+                obs_type = aleat ;
 
-                obs_type = arrow ;
+                //obs_type = arrow ;
+
                 printf("TIPO %d\n", obs_type) ;
                 
                 switch (obs_type) {
                     case stem: 
 
-                        width = 20; height = 30; 
+                        visual_w = 107; visual_h = 85; 
+                        width = 71; height = 64; 
                         sprite = manager->obstacles_sprites[stem] ;
+                        spawn_x = screen_width +100 ;
+                        spawn_y = y_floor -height/7; //spawna no chao
                         printf("Criando STEM - sprite: %p\n", sprite);
 
                     break; 
 
                     case arrow: 
                     
-                        width = 30; height = 40; 
+                        visual_w = 300, visual_h = 150; 
+                        width = 47; height = 27; 
                         sprite = manager->obstacles_sprites[arrow] ;
+                        spawn_x = screen_width +100 ;
+                        spawn_y = y_floor -height/2 -(PLAYER_H/2) - (rand() % 100); //spawna no ar 
+
                         printf("Criando ARROW - sprite: %p\n", sprite);
                     
                     break; 
 
                     case stone: 
                     
-                        width = 30; height = 40; 
+                        visual_w = 50; visual_h = 50; 
+                        width = 40; height = 40; 
                         sprite = manager->obstacles_sprites[stone] ;
+                        spawn_x = screen_width +100 ;
+                        spawn_y = y_floor -height/2; //spawna no chao
                         printf("Criando STONE - sprite: %p\n", sprite);
                     
                     break; 
@@ -203,9 +247,9 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 }
                 
                 manager->obstacles[i] = obstacle_create(
-                    screen_width + 100, 
-                    y_floor - height/2, 
+                    spawn_x, spawn_y, 
                     width, height, 
+                    visual_w, visual_h,
                     -((rand() % 3) + 2), // Velocidade aleatória
                     0, 
                     obs_type,
