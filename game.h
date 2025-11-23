@@ -25,7 +25,8 @@
 typedef enum {
     MENU,
     GAMEPLAY,
-    GAMEOVER
+    GAMEOVER,
+    VICTORY
 
 } game_state;
 

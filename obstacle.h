@@ -10,8 +10,7 @@
 #include "fase.h"
 #include "player.h"
 
-#define DIFFERENT_OBSTACLES 3 
-
+#define DIFFERENT_OBSTACLES 4 
 typedef enum {
     stem,
     arrow,

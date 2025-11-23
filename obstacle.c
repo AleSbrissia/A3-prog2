@@ -129,6 +129,7 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     manager->obstacles_sprites[stem] = al_load_bitmap("assets/sprites/obstacles/stem.png");
     manager->obstacles_sprites[arrow] = al_load_bitmap("assets/sprites/obstacles/arrow.png"); 
     manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/obstacles/stone.png");
+    manager->obstacles_sprites[spike] = al_load_bitmap("assets/sprites/obstacles/spike.png");
     
     // Verifica se carregou
     for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {
@@ -234,9 +235,18 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
 
                     case spike: 
                     
-                        width = 30; height = 40; 
-                        sprite = NULL ;
+                        visual_w = 140; visual_h = 30; 
+                        width = 140; height = 30; 
+                        sprite = manager->obstacles_sprites[spike] ;
                     
+                        spawn_x = screen_width -50 ;
+                        spawn_y = y_floor -height/4 ; //spawna no chao
+
+                        speed_x = 0 ;
+                        speed_y = 0 ;
+
+                        printf("Criando SPIKE - sprite: %p\n", sprite);
+
                     break; 
                 }
                 

@@ -76,6 +76,9 @@ int main() {
 						p1->alive = false ;
 						estado = GAMEOVER ;
 					}
+					if(p1->win) {
+						estado = VICTORY;
+					}
 				}
 				redraw = true ;
 			break;
