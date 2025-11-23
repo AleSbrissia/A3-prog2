@@ -34,10 +34,11 @@ int main() {
 	al_register_event_source(queue, al_get_display_event_source(disp));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
-	if (!game_bg_img) {
-        
+	if (!game_bg_img) {       
+
 		fprintf(stderr, "erro carregamento de sprite\n") ;
 	}
+
 	font = al_load_font("assets/Daydream.ttf", 36, 0) ;
 	if (!font) {
 

@@ -71,15 +71,28 @@ void player_update_movement(player *p, float dt, square *floor) {
 
 	//const float move_dist = PLAYER_SPEED_PER_SEC * dt;
 	int move_dist = PLAYER_STEP ;
+    player_state old_st = p->state ;
 
 	if(p->damage_dalay != 0)
 		p->damage_dalay-- ;
+
+    //controla os estados
+    if ((p->control->right || p->control->left)) {
+        p->state = WALKING ;
+    }
+
+    if (p->control->down && p->ground) {
+        p->state = CROUCHING ;
+    }
+    if (p->state != old_st)
+        player_update_state(p, old_st) ;
 
     // --- LÓGICA DE MOVIMENTO FÍSICO ---
     // Apenas atualiza a posição e a direção do jogador
     if (p->control->right) {
         p->x += move_dist;
-    } else if (p->control->left) {
+    } 
+    else if (p->control->left) {
         p->x -= move_dist;
     }
     if (p->x < p->w/2) {
@@ -90,10 +103,6 @@ void player_update_movement(player *p, float dt, square *floor) {
     }
     if (p->y - p->h/2 < 0) {
         p->y = p->h/2;  // Encosta no topo
-    }
-
-    if (p->control->down && p->ground) {
-        p->state = CROUCHING ;
     }
 
     if (p->control->up && p->ground) {
@@ -109,6 +118,7 @@ void player_update_movement(player *p, float dt, square *floor) {
             p->ground = true;
         }
     }
+
 }
 
 // Função alternativa para desenhar corações
@@ -141,9 +151,33 @@ void player_draw_health(player *p) {
 void draw_player(player *p) {
     if(!p) return ;
 
-    al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
-                            p->x + p->w/2, p->y + p->h/2,
-                            al_map_rgb(255, 0, 0));
+    if (p->state == WALKING)
+        al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
+                                p->x + p->w/2, p->y + p->h/2,
+                                al_map_rgb(255, 0, 0));
+    if (p->state == CROUCHING)
+        al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
+                                p->x + p->w/2, p->y + p->h/2,
+                                al_map_rgb(0, 0, 255));
 
 }
 
+void player_update_state(player *p, player_state old_st) {
+    if(!p) return ;
+
+    if (p->state == WALKING)
+    {
+        p->w = PLAYER_W ;
+        p->h = PLAYER_H ;
+
+        if(old_st == CROUCHING) {
+            p->y = p->y -(PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
+        }
+    }
+    if (p->state == CROUCHING)
+    {
+        p->w = PLAYER_W ;
+        p->h = PLAYER_H_CROUCHED ;
+        p->y = p->y + (PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
+    }
+}

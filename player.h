@@ -7,6 +7,7 @@
 
 #define PLAYER_W 50	
 #define PLAYER_H 100	
+#define PLAYER_H_CROUCHED 50	
 
 #define PLAYER_START_X PLAYER_W/2	
 
@@ -46,15 +47,11 @@ typedef struct {
 } player;		
 
 player* player_create(int xside, int yside, int x, int y,int max_x, int max_y);
-
 void player_move(player *element, char steps, int trajectory, int max_x, int max_y);
-
 void player_destroy(player *element);
-
 void player_update_movement(player *p, float dt, square *floor) ;
-
 void player_draw_health(player *p) ;
-
 void draw_player(player *p) ;
+void player_update_state(player *p, player_state old_st) ;
 
 #endif
