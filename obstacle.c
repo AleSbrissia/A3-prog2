@@ -25,9 +25,6 @@ obstacle* obstacle_create(int x, int y, int w, int h, int v_w, int v_h, float sp
 }
 void obstacle_destroy(obstacle* obs) {
     if (obs) {
-        if (obs->sprite) {
-            al_destroy_bitmap(obs->sprite);
-        }
         free(obs);
     }
 }
@@ -38,26 +35,8 @@ void obstacle_reset(obstacle* obs, int screen_width, int y_floor) {
     // Reposiciona o obstáculo à direita da tela com variação aleatória
     obs->x = screen_width + (rand() % 200) + 100;
 
-    switch (obs->type) {
-        case arrow:
-            // Flechas spawnam no ar
-            obs->y = y_floor - obs->h/2 - (PLAYER_H/2) - (rand() % 100);
-            break;
-            
-        case stem: break; //mantem mesma altura
-
-        case stone: break;
-        case spike:
-        default:
-            // Outros obstáculos spawnam no chão
-            obs->y = y_floor - obs->h/2;
-            break;
-    }
-
-    obs->active = true;
+    obs->active = false;
     
-    // Variação na velocidade para tornar mais interessante
-    obs->speed_x = -((rand() % 3) + 2); // Velocidade entre -2 e -4
 }
 
 int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int gravity) {
@@ -117,7 +96,7 @@ int draw_obstacle(obstacle* obs) {
                              obs->visual_h,
                              0);
         
-        // DEBUG: Desenha a hitbox (remova depois de testar)
+        // Desenha a hitbox 
         al_draw_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
                          obs->x + obs->w/2, obs->y + obs->h/2,
                          al_map_rgb(255, 0, 0), 2);
@@ -144,7 +123,6 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     
     manager->obstacles = malloc(sizeof(obstacle*) * max_obs);
     
-    // CORREÇÃO: Aloca e carrega os sprites DIRETAMENTE
     manager->obstacles_sprites = malloc(sizeof(ALLEGRO_BITMAP*) * DIFFERENT_OBSTACLES);
     
     // Carrega cada sprite
@@ -180,7 +158,8 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
     obstacle_type obs_type ; 
     ALLEGRO_BITMAP *sprite = NULL ;
     int i, aleat, width, height, spawn_x, spawn_y;
-    int visual_w, visual_h;
+    int visual_w, visual_h ;
+    float speed_x, speed_y;
                 
     if (!manager) return;
     
@@ -200,6 +179,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 obs_type = aleat ;
 
                 //obs_type = arrow ;
+                //obs_type = stone ;
 
                 printf("TIPO %d\n", obs_type) ;
                 
@@ -209,8 +189,13 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         visual_w = 107; visual_h = 85; 
                         width = 71; height = 64; 
                         sprite = manager->obstacles_sprites[stem] ;
+
                         spawn_x = screen_width +100 ;
                         spawn_y = y_floor -height/7; //spawna no chao
+
+                        speed_x = (float) -(rand() % 9) -7 ;
+                        speed_y = 0 ;
+
                         printf("Criando STEM - sprite: %p\n", sprite);
 
                     break; 
@@ -220,8 +205,12 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         visual_w = 300, visual_h = 150; 
                         width = 47; height = 27; 
                         sprite = manager->obstacles_sprites[arrow] ;
+
                         spawn_x = screen_width +100 ;
                         spawn_y = y_floor -height/2 -(PLAYER_H/2) - (rand() % 100); //spawna no ar 
+
+                        speed_x = (float) -(rand() % 10) -15 ;
+                        speed_y = 0 ;
 
                         printf("Criando ARROW - sprite: %p\n", sprite);
                     
@@ -232,8 +221,13 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         visual_w = 50; visual_h = 50; 
                         width = 40; height = 40; 
                         sprite = manager->obstacles_sprites[stone] ;
+
                         spawn_x = screen_width +100 ;
-                        spawn_y = y_floor -height/2; //spawna no chao
+                        spawn_y = y_floor -height -200 -(rand()%200) ; //spawna no ar
+
+                        speed_x = (float) -(rand() % 10) -10 ;
+                        speed_y =  0.5f;
+
                         printf("Criando STONE - sprite: %p\n", sprite);
                     
                     break; 
@@ -250,8 +244,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                     spawn_x, spawn_y, 
                     width, height, 
                     visual_w, visual_h,
-                    -((rand() % 3) + 2), // Velocidade aleatória
-                    0, 
+                    speed_x, speed_y, 
                     obs_type,
                     sprite
                 );
@@ -275,8 +268,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                     player->health-- ;
                     player->damage_dalay = PLAYER_DAMAGE_DALAY ;
                 }
-
-                // Aqui você pode implementar lógica de game over ou dano
             }
         }
     }

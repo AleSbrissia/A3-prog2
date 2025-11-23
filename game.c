@@ -113,12 +113,7 @@ void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
     player_draw_health(p) ;
 
     // Desenha o player 
-    al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
-                            p->x + p->w/2, p->y + p->h/2,
-                            al_map_rgb(255, 0, 0));
-    /*al_draw_filled_rectangle(floor->x - floor->w/2, floor->y - floor->h/2,
-                            floor->x + floor->w/2, floor->y + floor->h/2, 
-                            al_map_rgb(0, 255, 0));*/
+    draw_player(p) ;
 }
 
 int wasd_keys(player *p1, ALLEGRO_EVENT *ev){

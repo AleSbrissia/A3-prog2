@@ -20,8 +20,12 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
 	new_player->h = yside;
 	new_player->x = x;	
 	new_player->y = y;	
+    new_player->visual_w = xside ;
+    new_player->visual_h = yside ;
+
 	new_player->ground = true;	
 	new_player->fall = 0 ;
+    new_player->state = WALKING;
 
     new_player->max_health = PLAYER_MAX_HEALTH ;
 	new_player->health = new_player->max_health ;
@@ -88,6 +92,10 @@ void player_update_movement(player *p, float dt, square *floor) {
         p->y = p->h/2;  // Encosta no topo
     }
 
+    if (p->control->down && p->ground) {
+        p->state = CROUCHING ;
+    }
+
     if (p->control->up && p->ground) {
         p->fall = PLAYER_JUMP;
         p->ground = false;
@@ -130,4 +138,12 @@ void player_draw_health(player *p) {
     }
 }
 
+void draw_player(player *p) {
+    if(!p) return ;
+
+    al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
+                            p->x + p->w/2, p->y + p->h/2,
+                            al_map_rgb(255, 0, 0));
+
+}
 

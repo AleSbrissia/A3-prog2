@@ -19,8 +19,8 @@
 
 #define GRAVITY 1.2f
 
-#define MAX_OBSTACLES 5
-#define OBSTACLE_SPAWN_INTERVAL 2.0f
+#define MAX_OBSTACLES 10 
+#define OBSTACLE_SPAWN_INTERVAL 1.0f
 
 typedef enum {
     MENU,
