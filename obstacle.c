@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <time.h>
 
-obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, const char* sprite_path) {
+obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, ALLEGRO_BITMAP *sprite) {
+
     obstacle* obs = malloc(sizeof(obstacle));
     if (!obs) return NULL;
     
@@ -16,20 +17,10 @@ obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed
     obs->active = true;
     obs->color = al_map_rgb(0, 255, 0); // Cor padrão verde 
     obs->type = type ;
-    
-    // Carregar sprite se fornecido
-    if (sprite_path) {
-        obs->sprite = al_load_bitmap(sprite_path);
-        if (!obs->sprite) {
-            printf("Erro ao carregar sprite do obstáculo: %s\n", sprite_path);
-        }
-    } else {
-        obs->sprite = NULL;
-    }
+    obs->sprite = sprite ;
     
     return obs;
 }
-
 void obstacle_destroy(obstacle* obs) {
     if (obs) {
         if (obs->sprite) {
@@ -109,8 +100,6 @@ int draw_obstacle(obstacle* obs) {
                          obs->x + obs->w/2, obs->y + obs->h/2,
                          al_map_rgb(255, 255, 255), 1);*/
     }
-    if(obs->sprite)
-        al_draw_bitmap(obs->sprite, obs->x -obs->w/2, obs->y -obs->h/2, 0) ;
 
     return 0;
 }
@@ -122,21 +111,35 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     if (!manager) return NULL;
     
     manager->obstacles = malloc(sizeof(obstacle*) * max_obs);
+    
+    // CORREÇÃO: Aloca e carrega os sprites DIRETAMENTE
+    manager->obstacles_sprites = malloc(sizeof(ALLEGRO_BITMAP*) * DIFFERENT_OBSTACLES);
+    
+    // Carrega cada sprite
+    manager->obstacles_sprites[stem] = al_load_bitmap("assets/sprites/stem.png");
+    manager->obstacles_sprites[arrow] = al_load_bitmap("assets/sprites/arrow.png"); 
+    manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/stone.png");
+    
+    // Verifica se carregou
+    for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {
+        if (!manager->obstacles_sprites[i]) {
+            printf("ERRO: Não carregou sprite %d\n", i);
+        }
+    }
+    
     manager->count = 0;
     manager->max_obstacles = max_obs;
     manager->spawn_timer = 0;
     manager->spawn_interval = spawn_interval;
     manager->scroll_speed = scroll_speed;
     
-    // Inicializa todos os obstáculos como NULL
+    // Inicializa obstáculos como NULL
     for (int i = 0; i < max_obs; i++) {
         manager->obstacles[i] = NULL;
     }
     
-    // Seed para números aleatórios
-    //srand(time(NULL));
     srand(time(NULL));
-    
+    //srand(0) ;
     return manager;
 }
 
@@ -145,8 +148,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
     obstacle_type obs_type ; 
     ALLEGRO_BITMAP *sprite = NULL ;
     int width, height, i, aleat;
-    const char *arrow_path = "assets/sprites/arrow.png" ;
-    const char *stem_path = "assets/sprites/stem.png" ;
                 
     if (!manager) return;
     
@@ -162,18 +163,43 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 }
                 
                 // Aleatoriza tipo/tamanho do obstáculo
-                aleat = rand() % 3;
-                
-                obs_type = aleat ;
+                //aleat = rand() % DIFFERENT_OBSTACLES;
+                //obs_type = aleat ;
+
+                obs_type = arrow ;
+                printf("TIPO %d\n", obs_type) ;
                 
                 switch (obs_type) {
                     case stem: 
+
                         width = 20; height = 30; 
+                        sprite = manager->obstacles_sprites[stem] ;
+                        printf("Criando STEM - sprite: %p\n", sprite);
+
                     break; 
 
-                    case 1: width = 30; height = 40; break; // Médio  
-                    case 2: width = 25; height = 35; break; // Outro
-                    default: width = 24; height = 30; break;
+                    case arrow: 
+                    
+                        width = 30; height = 40; 
+                        sprite = manager->obstacles_sprites[arrow] ;
+                        printf("Criando ARROW - sprite: %p\n", sprite);
+                    
+                    break; 
+
+                    case stone: 
+                    
+                        width = 30; height = 40; 
+                        sprite = manager->obstacles_sprites[stone] ;
+                        printf("Criando STONE - sprite: %p\n", sprite);
+                    
+                    break; 
+
+                    case spike: 
+                    
+                        width = 30; height = 40; 
+                        sprite = NULL ;
+                    
+                    break; 
                 }
                 
                 manager->obstacles[i] = obstacle_create(
@@ -183,7 +209,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                     -((rand() % 3) + 2), // Velocidade aleatória
                     0, 
                     obs_type,
-                    NULL // Sem sprite por enquanto
+                    sprite
                 );
                 
                 manager->spawn_timer = 0;
@@ -228,9 +254,20 @@ void obstacle_manager_destroy(obstacle_manager* manager) {
     for (int i = 0; i < manager->max_obstacles; i++) {
         if (manager->obstacles[i]) {
             obstacle_destroy(manager->obstacles[i]);
+            manager->obstacles[i] = NULL ;
         }
     }
     free(manager->obstacles);
+
+    if (manager->obstacles_sprites) {
+        for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {
+            if (manager->obstacles_sprites[i]) {
+                al_destroy_bitmap(manager->obstacles_sprites[i]);
+            }
+        }
+        free(manager->obstacles_sprites);
+    }
+
     free(manager);
 }
 
@@ -243,16 +280,4 @@ void obstacle_manager_reset_all(obstacle_manager* manager, int screen_width, int
         }
     }
     manager->spawn_timer = 0;
-}
-
-/*DAQUI SAI LEAK*/
-void obstacle_manager_load(ALLEGRO_BITMAP **obs_sprites) {
-
-    obs_sprites = malloc(sizeof(*obs_sprites) * DIFFERENT_OBSTACLES) ;
-    if(!obs_sprites) {
-        fprintf(stderr, "ERRO ALOCAO OBS_MAN_LOAD") ;
-    }
-
-    obs_sprites[0] = al_load_bitmap("assets/sprites/stem.png") ;
-    obs_sprites[1] = al_load_bitmap("assets/sprites/arrow.png") ;
 }

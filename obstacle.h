@@ -10,13 +10,13 @@
 #include "fase.h"
 #include "player.h"
 
-#define DIFFERENT_OBSTACLES 2
+#define DIFFERENT_OBSTACLES 3 
 
 typedef enum {
     stem,
     arrow,
-    spike,
-    stone
+    stone,
+    spike
     
 } obstacle_type;
 
@@ -32,7 +32,7 @@ typedef struct {
 // Sistema de gerenciamento de múltiplos obstáculos
 typedef struct {
     obstacle** obstacles;
-    obstacle_sprites** 
+    ALLEGRO_BITMAP** obstacles_sprites ; 
     int count;
     int max_obstacles;
     float spawn_timer;
@@ -41,10 +41,9 @@ typedef struct {
 } obstacle_manager;
 
 // Funções básicas do obstáculo
-obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, const char* sprite_path) ;
+obstacle* obstacle_create(int x, int y, int w, int h, float speed_x, float speed_y, obstacle_type type, ALLEGRO_BITMAP *sprite) ;
 void obstacle_destroy(obstacle* obs);
 void obstacle_reset(obstacle* obs, int screen_width, int y_floor) ;
-void obstacle_manager_load(ALLEGRO_BITMAP **obs_sprites) ;
 
 // Movimento e colisão
 int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int gravity) ;
@@ -52,7 +51,7 @@ bool obstacle_check_collision(obstacle* obs, player* p);
 int draw_obstacle(obstacle* obs);
 
 // Sistema de gerenciamento
-obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, float scroll_speed);
+obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, float scroll_speed) ;
 void obstacle_manager_update(obstacle_manager* manager, float delta_time, player* player, int screen_width, int y_floor, int gravity) ;
 void obstacle_manager_draw(obstacle_manager* manager);
 void obstacle_manager_destroy(obstacle_manager* manager);

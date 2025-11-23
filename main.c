@@ -26,9 +26,6 @@ int main() {
 	ALLEGRO_FONT* font = NULL ;	
 	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);
     ALLEGRO_BITMAP* game_bg_img = al_load_bitmap("assets/bg.png") ;
-    ALLEGRO_BITMAP **obstacles_sprites = NULL ;
-
-    obstacle_manager_load(obstacles_sprites) ;
 
 	if(!timer || !queue || !disp)
 		return -1 ;	
