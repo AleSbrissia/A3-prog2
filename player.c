@@ -27,7 +27,7 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
 
 	new_player->ground = true;	
 	new_player->fall = 0 ;
-    new_player->state = WALKING;
+    new_player->state = STILL;
 
     new_player->max_health = PLAYER_MAX_HEALTH ;
 	new_player->health = new_player->max_health ;
@@ -40,7 +40,9 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
     new_player->sprites = malloc(sizeof(ALLEGRO_BITMAP*) * PLAYER_STATES);
     
     // Carrega cada sprite
+    new_player->sprites[STILL] = al_load_bitmap("assets/sprites/player/still1.png");
     new_player->sprites[WALKING] = al_load_bitmap("assets/sprites/player/run1.png");
+    new_player->sprites[JUMPING] = al_load_bitmap("assets/sprites/player/jump.png");
     
     // Verifica se carregou
     for (int i = 0; i < PLAYER_STATES; i++) {
@@ -93,12 +95,17 @@ void player_update_movement(player *p, float dt, square *floor) {
 		p->damage_dalay-- ;
 
     //controla os estados
-    if ((p->control->right || p->control->left)) {
+    if ((p->control->right || p->control->left) && p->ground) {
         p->state = WALKING ;
     }
-
+    if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && p->ground) {
+        p->state = STILL ;
+    }
     if (p->control->down && p->ground) {
         p->state = CROUCHING ;
+    }
+    if (p->control->up && p->ground) {
+        p->state = JUMPING ;
     }
     if (p->state != old_st)
         player_update_state(p, old_st) ;
@@ -168,32 +175,35 @@ void draw_player(player *p) {
     if(!p) return ;
 
 
-    if (p->state == WALKING && p->sprites[WALKING]) {
+    if (p->state != CROUCHING) {
 
-        al_draw_scaled_bitmap(p->sprites[WALKING],
-                             0, 0, 
-                             al_get_bitmap_width(p->sprites[WALKING]),
-                             al_get_bitmap_height(p->sprites[WALKING]),
-                             p->x - p->visual_w/2,
-                             p->y - p->visual_h/2,
-                             p->visual_w,
-                             p->visual_h,
-                             0);
+        if(p->sprites[p->state]) {
 
-        // Desenha a hitbox (vermelha) e área visual (azul)
-        al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
-                        p->x + p->w/2, p->y + p->h/2,
-                        al_map_rgb(255, 0, 0), 3);  // Hitbox vermelha
+            al_draw_scaled_bitmap(p->sprites[p->state],
+                                0, 0, 
+                                al_get_bitmap_width(p->sprites[p->state]),
+                                al_get_bitmap_height(p->sprites[p->state]),
+                                p->x - p->visual_w/2,
+                                p->y - p->visual_h/2,
+                                p->visual_w,
+                                p->visual_h,
+                                0);
 
-        al_draw_rectangle(p->x - p->visual_w/2, p->y - p->visual_h/2,
-                        p->x + p->visual_w/2, p->y + p->visual_h/2,
-                        al_map_rgb(0, 0, 255), 1);  // Área visual azul
+            // Desenha a hitbox (vermelha) e área visual (azul)
+            al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
+                            p->x + p->w/2, p->y + p->h/2,
+                            al_map_rgb(255, 0, 0), 3);  // Hitbox vermelha
+
+            al_draw_rectangle(p->x - p->visual_w/2, p->y - p->visual_h/2,
+                            p->x + p->visual_w/2, p->y + p->visual_h/2,
+                            al_map_rgb(0, 0, 255), 1);  // Área visual azul
+        }
+        else 
+            al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
+                                    p->x + p->w/2, p->y + p->h/2,
+                                    al_map_rgb(255, 0, 0));
 
     }
-    else 
-        al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
-                                p->x + p->w/2, p->y + p->h/2,
-                                al_map_rgb(255, 0, 0));
 
     if (p->state == CROUCHING)
         al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
@@ -205,7 +215,7 @@ void draw_player(player *p) {
 void player_update_state(player *p, player_state old_st) {
     if(!p) return ;
 
-    if (p->state == WALKING)
+    if (p->state != CROUCHING)
     {
         p->w = PLAYER_W ;
         p->h = PLAYER_H ;
@@ -214,7 +224,8 @@ void player_update_state(player *p, player_state old_st) {
             p->y = p->y -(PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
         }
     }
-    if (p->state == CROUCHING)
+
+    if (p->state == CROUCHING && old_st != CROUCHING)
     {
         p->w = PLAYER_W ;
         p->h = PLAYER_H_CROUCHED ;
