@@ -122,7 +122,7 @@ int draw_obstacle(obstacle* obs) {
     return 0;
 }
 
-// ========== SISTEMA DE GERENCIAMENTO DE MÚLTIPLOS OBSTÁCULOS ==========
+// OBSTACLE MANAGER 
 
 obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, float scroll_speed) {
     obstacle_manager* manager = malloc(sizeof(obstacle_manager));

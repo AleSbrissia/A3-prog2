@@ -51,12 +51,13 @@ int main() {
 	player* p1 = NULL ;
 	square* floor = NULL ;
     obstacle_manager* obs_manager = NULL ;
+	platform_manager* plat_manager = NULL ;
     game_state estado = MENU ;
 	bool done = false;
 	bool redraw = true ; 
 	int menu_select = 1 ;
 
-    game_set(&p1, &floor, &obs_manager) ;
+    game_set(&p1, &floor, &obs_manager, &plat_manager) ;
 
 	al_start_timer(timer);
 
@@ -69,8 +70,13 @@ int main() {
 			case ALLEGRO_EVENT_TIMER :
                 
 				if(estado == GAMEPLAY) {
-					player_update_movement(p1, 1.0/FPS, floor) ;
+					player_update_movement(p1, 1.0/FPS, floor, plat_manager) ;
 					obstacle_manager_update(obs_manager, 1.0/FPS, p1, X_SCREEN, Y_FLOOR, GRAVITY) ;
+
+
+					if(plat_manager) {
+						platform_manager_update(plat_manager, 1.0/FPS, X_SCREEN) ;
+					}
 
 					if(p1->health == 0) {
 						p1->alive = false ;
@@ -118,8 +124,8 @@ int main() {
 							if (menu_select == 1) {
 
 								obstacle_manager_reset_all(obs_manager, X_SCREEN, Y_FLOOR) ;
-								game_clean(p1, floor, obs_manager) ;
-								game_set(&p1, &floor, &obs_manager) ;
+								game_clean(p1, floor, obs_manager, plat_manager) ;
+								game_set(&p1, &floor, &obs_manager, &plat_manager) ;
 								estado = GAMEPLAY;
 							} 
 							else {
@@ -138,8 +144,8 @@ int main() {
 							if (menu_select == 1) {
 
 								obstacle_manager_reset_all(obs_manager, X_SCREEN, Y_FLOOR) ;
-								game_clean(p1, floor, obs_manager) ;
-								game_set(&p1, &floor, &obs_manager) ;
+								game_clean(p1, floor, obs_manager, plat_manager) ;
+								game_set(&p1, &floor, &obs_manager, &plat_manager) ;
 								estado = GAMEPLAY;
 							} 
 							else {
@@ -190,7 +196,7 @@ int main() {
 
 				case GAMEPLAY : 
 					al_clear_to_color(al_map_rgb(0, 0, 0));
-					draw_gameplay(game_bg_img, p1, floor) ;
+					draw_gameplay(game_bg_img, p1, floor, plat_manager) ;
 					obstacle_manager_draw(obs_manager) ;
 
 				break;
@@ -206,6 +212,7 @@ int main() {
     if (game_bg_img) al_destroy_bitmap(game_bg_img);  
 	player_destroy(p1) ;
 	obstacle_manager_destroy(obs_manager) ;
+	platform_manager_destroy(plat_manager) ;
 
 	return 0;
 }

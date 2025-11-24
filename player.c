@@ -9,6 +9,7 @@
 #include "joystick.h"
 #include "game.h"
 #include "fase.h"
+#include "platform.h"
 
 player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){						
 
@@ -85,12 +86,25 @@ void player_destroy(player *element){
 }
 
 // Atualiza o movimento e estado do jogador com base nos controles
-void player_update_movement(player *p, float dt, square *floor) {
+void player_update_movement(player *p, float dt, square *floor, platform_manager *plat_manager) {
 
     if (!p || !p->control) {
 		fprintf(stderr, "NULL pointer player_update \n") ;
 		return;
 	}
+
+    // NOVO: Verifica colisão com plataformas antes de aplicar gravidade
+    bool on_platform = false;
+    if (plat_manager) {
+
+        for (int i = 0; i < plat_manager->max_platforms; i++) 
+            if (plat_manager->platforms[i] && plat_manager->platforms[i]->active) 
+                if (platform_check_collision(plat_manager->platforms[i], p)) {
+                    platform_handle_collision(plat_manager->platforms[i], p);
+                    on_platform = true;
+                    break;
+                }
+    }
 
 	//const float move_dist = PLAYER_SPEED_PER_SEC * dt;
 	int move_dist = PLAYER_STEP ;
@@ -100,30 +114,30 @@ void player_update_movement(player *p, float dt, square *floor) {
 		p->damage_dalay-- ;
 
     //controla os estados
-    if (p->control->down && p->ground) {
+    if (p->control->down && (p->ground || on_platform)) {
         p->state = CROUCHING ;
     }
-    if ((p->control->right) && p->ground) {
+    if ((p->control->right) && (p->ground || on_platform)) {
         p->state = WALKING_R ;
     }
-    if ((p->control->left) && p->ground) {
+    if ((p->control->left) && (p->ground || on_platform)) {
         p->state = WALKING_L ;
     }
-    if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && p->ground) {
+    if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && (p->ground || on_platform)) {
 
         if (old_st == JUMPING_R || old_st == WALKING_R || old_st == STILL_R )
             p->state = STILL_R;
         if (old_st == JUMPING_L || old_st == WALKING_L || old_st == STILL_L )
             p->state = STILL_L;
     }
-    if (p->control->up && p->ground) {
+    if (p->control->up && (p->ground || on_platform)) {
         
         if (old_st == WALKING_R || old_st == STILL_R )
             p->state = JUMPING_R ;
         if (old_st == WALKING_L || old_st == STILL_L )
             p->state = JUMPING_L;
     }
-    if(!p->ground) {
+    if(!p->ground && !on_platform) {
 
         if (p->control->right) 
             p->state = JUMPING_R ;
@@ -156,23 +170,30 @@ void player_update_movement(player *p, float dt, square *floor) {
         p->y = p->h/2;  // Encosta no topo
     }
 
-    if (p->control->up && p->ground) {
+    //Logica de pulo 
+    if (p->control->up && (p->ground || on_platform)) {
         p->fall = PLAYER_JUMP;
         p->ground = false;
+        on_platform = false;
     }
-    if (!p->ground) {
+
+    if (!p->ground && !on_platform) {
+
         p->fall += GRAVITY;
         p->y += p->fall;
+
         if (p->y >= Y_FLOOR -  p->h/2) {
+
             p->y = Y_FLOOR - p->h/2;
             p->fall = 0;
             p->ground = true;
         }
     }
+    else if (on_platform) p->fall = 0 ;
 
 }
 
-// Função alternativa para desenhar corações
+// Função alternativa para desenhar vida
 void player_draw_health(player *p) {
     if (!p) return;
     

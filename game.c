@@ -82,7 +82,7 @@ void draw_menu(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
 
 }
 
-void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
+void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor, platform_manager *plat_manager) {
     
     if (bg) {
         int img_w = al_get_bitmap_width(bg);
@@ -104,6 +104,11 @@ void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor) {
                                 -scroll_x, 0, draw_w, draw_h, 0);
     }
     player_draw_health(p) ;
+
+    // Desenha as plataformas
+    if (plat_manager) {
+        platform_manager_draw(plat_manager);
+    }
 
     // Desenha o player 
     draw_player(p) ;
@@ -248,9 +253,9 @@ void draw_victory(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
 }
 
 //NECESSITA DE PONTEIROS NULOS
-int game_set(player **p, square **floor, obstacle_manager **obs_manager) {
+int game_set(player **p, square **floor, obstacle_manager **obs_manager, platform_manager **plat_manager) {
 
-	if(!p || !floor || !obs_manager) {
+	if(!p || !floor || !obs_manager || !plat_manager) {
         fprintf(stderr, "ERRO GAME SET\n") ;
 		return -1 ;
     }
@@ -261,6 +266,7 @@ int game_set(player **p, square **floor, obstacle_manager **obs_manager) {
 	*p = player_create(PLAYER_W, PLAYER_H, PLAYER_START_X, player_start_y, X_SCREEN, Y_SCREEN);
 	*floor = square_create(X_SCREEN, H_GROUND, X_SCREEN/2, floor_center_y, X_SCREEN, Y_SCREEN);
     *obs_manager = obstacle_manager_create(5, 2.0f, 1.0f) ;
+    *plat_manager = platform_manager_create(MAX_PLATFORMS, PLATFORM_SPAWN_INTERVAL) ;
 
 	if(!*p || !*floor || !*obs_manager) {
         fprintf(stderr, "ERRO GAME SET, NAO ALOCOU\n") ;
@@ -269,16 +275,17 @@ int game_set(player **p, square **floor, obstacle_manager **obs_manager) {
     return 0 ;
 }
 
-int game_clean(player *p, square *floor, obstacle_manager *obs_manager) {
+int game_clean(player *p, square *floor, obstacle_manager *obs_manager, platform_manager *plat_manager) {
 
     if(!p || !floor || !obs_manager) {
         fprintf(stderr, "ERRO GAME CLEAN\n") ;
         return -1 ;
     }
 
-    free(p) ;
+    player_destroy(p);
     free(floor) ;
-    free(obs_manager) ;
+    obstacle_manager_destroy(obs_manager) ;
+    platform_manager_destroy(plat_manager) ;
 
     return 0 ;
 }
