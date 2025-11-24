@@ -11,7 +11,7 @@
 #include "fase.h"
 #include "platform.h"
 
-player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){						
+player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){	
 
 	if ((x - xside/2 < 0) || (x + xside/2 > max_x))
 	    return NULL;
@@ -93,7 +93,8 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
 		return;
 	}
 
-    // NOVO: Verifica colisão com plataformas antes de aplicar gravidade
+    //ARRUMAR
+    //colisão com plataformas 
     bool on_platform = false;
     if (plat_manager) {
 
@@ -114,15 +115,20 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
 		p->damage_dalay-- ;
 
     //controla os estados
+
+	//agachado
     if (p->control->down && (p->ground || on_platform)) {
-        p->state = CROUCHING ;
+ 
+		p->state = CROUCHING ;
     }
+	//andando 
     if ((p->control->right) && (p->ground || on_platform)) {
         p->state = WALKING_R ;
     }
     if ((p->control->left) && (p->ground || on_platform)) {
         p->state = WALKING_L ;
     }
+	//parado
     if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && (p->ground || on_platform)) {
 
         if (old_st == JUMPING_R || old_st == WALKING_R || old_st == STILL_R )
@@ -130,6 +136,7 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
         if (old_st == JUMPING_L || old_st == WALKING_L || old_st == STILL_L )
             p->state = STILL_L;
     }
+	//pulando 
     if (p->control->up && (p->ground || on_platform)) {
         
         if (old_st == WALKING_R || old_st == STILL_R )
@@ -137,6 +144,7 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
         if (old_st == WALKING_L || old_st == STILL_L )
             p->state = JUMPING_L;
     }
+	//caindo
     if(!p->ground && !on_platform) {
 
         if (p->control->right) 
@@ -145,18 +153,20 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
         if (p->control->left) 
             p->state = JUMPING_L ;
     }
-
+    //atualiza estado 
     if (p->state != old_st)
         player_update_state(p, old_st) ;
 
-    // --- LÓGICA DE MOVIMENTO FÍSICO ---
-    // Apenas atualiza a posição e a direção do jogador
+    // logica de movimento 
     if (p->control->right) {
         p->x += move_dist;
     } 
+
     else if (p->control->left) {
         p->x -= move_dist;
     }
+
+    //borda esquerda
     if (p->x < p->w/2) {
         p->x = p->w/2;
     }
@@ -172,11 +182,13 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
 
     //Logica de pulo 
     if (p->control->up && (p->ground || on_platform)) {
+
         p->fall = PLAYER_JUMP;
         p->ground = false;
         on_platform = false;
     }
 
+    //Logica de queda
     if (!p->ground && !on_platform) {
 
         p->fall += GRAVITY;
@@ -193,7 +205,6 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
 
 }
 
-// Função alternativa para desenhar vida
 void player_draw_health(player *p) {
     if (!p) return;
     
@@ -300,7 +311,7 @@ void player_update_state(player *p, player_state old_st) {
 
     if (p->state == CROUCHING && old_st != CROUCHING)
     {
-        p->w = PLAYER_W ;
+        p->w = PLAYER_W_CROUCHED ;
         p->h = PLAYER_H_CROUCHED ;
         p->y = p->y + (PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
     }

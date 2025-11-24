@@ -1,4 +1,4 @@
-TARGET = A3 
+TARGET = Forest_Run 
 CFLAGS = -Wall -g
 SOURCES = main.c player.c joystick.c fase.c game.c obstacle.c platform.c
 HEADERS = joystick.h player.h fase.h game.h obstacle.h platform.h

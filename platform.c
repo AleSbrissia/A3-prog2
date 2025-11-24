@@ -47,6 +47,7 @@ bool platform_check_collision(platform* plat, player* p) {
     return collision_x && collision_y;
 }
 
+/*ARRUMAR*/
 void platform_handle_collision(platform* plat, player* p) {
     if (!plat || !p || !plat->active) return;
     
@@ -60,7 +61,7 @@ void platform_handle_collision(platform* plat, player* p) {
         // Coloca o player em cima da plataforma
         p->y = plat->y - p->h/2;
         p->fall = 0;
-        p->ground = true;
+        //p->ground = true;
     }
 }
 

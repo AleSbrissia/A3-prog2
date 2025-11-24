@@ -9,6 +9,7 @@
 #define PLAYER_W 50	
 #define PLAYER_H 100	
 #define PLAYER_H_CROUCHED 50	
+#define PLAYER_W_CROUCHED 30	
 #define PLAYER_STATES 7
 
 #define PLAYER_START_X PLAYER_W/2	
