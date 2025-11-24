@@ -47,7 +47,7 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
     new_player->sprites[WALKING_L] = al_load_bitmap("assets/sprites/player/run_left.png");
     new_player->sprites[JUMPING_R] = al_load_bitmap("assets/sprites/player/jump.png");
     new_player->sprites[JUMPING_L] = al_load_bitmap("assets/sprites/player/jump_left.png");
-    new_player->sprites[CROUCHING] = al_load_bitmap("assets/sprites/player/crouched.png");
+    new_player->sprites[CROUCHING] = al_load_bitmap("assets/sprites/player/crouched2.png");
     
     // Verifica se carregou
     for (int i = 0; i < PLAYER_STATES; i++) {

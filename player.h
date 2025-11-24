@@ -20,7 +20,7 @@
 #define PLAYER_MAX_HEALTH 5
 #define PLAYER_DAMAGE_DALAY 30 //1s sem dano 
 
-#define PLAYER_STEP 6
+#define PLAYER_STEP 3 
 #define PLAYER_JUMP -20
 
 typedef enum {

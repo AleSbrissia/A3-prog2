@@ -128,6 +128,25 @@ int main() {
 						}
 					break;
 
+					case VICTORY:
+
+						if (event.keyboard.keycode == ALLEGRO_KEY_UP) 
+						    menu_select = 1;
+						else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) 
+							menu_select = 2;
+						else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+							if (menu_select == 1) {
+
+								obstacle_manager_reset_all(obs_manager, X_SCREEN, Y_FLOOR) ;
+								game_clean(p1, floor, obs_manager) ;
+								game_set(&p1, &floor, &obs_manager) ;
+								estado = GAMEPLAY;
+							} 
+							else {
+								done = true;
+							}
+						}
+					break;
 						
 					redraw = true ;
 				}
@@ -160,6 +179,12 @@ int main() {
 				case GAMEOVER:
 					al_clear_to_color(al_map_rgb(0, 0, 0));
 					draw_gameover(game_bg_img, font, menu_select) ;
+				
+				break;
+
+				case VICTORY:
+					al_clear_to_color(al_map_rgb(0, 0, 0));
+					draw_victory(game_bg_img, font, menu_select) ;
 				
 				break;
 

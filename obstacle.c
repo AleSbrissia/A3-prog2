@@ -58,6 +58,13 @@ int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int g
         
         // Colisão com o chão
         if (obs->y + obs->h/2 >= y_floor) {
+
+            if(obs->type == spike) {
+                obstacle_reset(obs, screen_width, y_floor);
+                return 1; // Obstáculo resetado
+            }
+
+
             obs->y = y_floor - obs->h/2;
             obs->speed_y = 0;
             return 2; // Obstáculo no chão
@@ -129,7 +136,7 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     manager->obstacles_sprites[stem] = al_load_bitmap("assets/sprites/obstacles/stem.png");
     manager->obstacles_sprites[arrow] = al_load_bitmap("assets/sprites/obstacles/arrow.png"); 
     manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/obstacles/stone.png");
-    manager->obstacles_sprites[spike] = al_load_bitmap("assets/sprites/obstacles/spike.png");
+    manager->obstacles_sprites[spike] = al_load_bitmap("assets/sprites/obstacles/spike1down.png");
     
     // Verifica se carregou
     for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {
@@ -235,15 +242,15 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
 
                     case spike: 
                     
-                        visual_w = 140; visual_h = 30; 
-                        width = 140; height = 30; 
+                        visual_w = 120; visual_h = 25; 
+                        width = 120; height = 25; 
                         sprite = manager->obstacles_sprites[spike] ;
                     
-                        spawn_x = screen_width -50 ;
-                        spawn_y = y_floor -height/4 ; //spawna no chao
+                        spawn_x = screen_width -width -(rand()% 400) ;
+                        spawn_y = 0 ; //spawna no em cima
 
                         speed_x = 0 ;
-                        speed_y = 0 ;
+                        speed_y = 0.1f ;
 
                         printf("Criando SPIKE - sprite: %p\n", sprite);
 

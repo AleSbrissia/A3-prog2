@@ -15,6 +15,8 @@
 #define H_GROUND 70 
 #define Y_FLOOR (Y_SCREEN - H_GROUND) 
 
+#define PHASE_LENGTH (X_SCREEN)*3
+
 #define FPS 30.0 
 
 #define GRAVITY 1.2f
@@ -37,5 +39,6 @@ int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) ;
 int wasd_keys(player *p1, ALLEGRO_EVENT *ev) ;
 int game_set(player **p, square **floor, obstacle_manager **obs_manager) ;
 int game_clean(player *p, square *floor, obstacle_manager *obs_manager) ;
+void draw_victory(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) ;
 
 #endif
