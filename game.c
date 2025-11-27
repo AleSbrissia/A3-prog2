@@ -94,7 +94,7 @@ void draw_gameplay(ALLEGRO_BITMAP *bg, player *p, square *floor, platform_manage
         float draw_h = img_h * scale;
         
         // Calcula a posição de scroll baseada na posição do player
-        float scroll_x = fmod(p->x * 2.0f, draw_w);
+        float scroll_x = fmod(p->x * SCROLL_SPEED, draw_w);
         
         // Garante que o scroll seja positivo
         if (scroll_x < 0) scroll_x += draw_w;
@@ -252,7 +252,7 @@ void draw_victory(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
 }
 
 //NECESSITA DE PONTEIROS NULOS
-int game_set(player **p, square **floor, obstacle_manager **obs_manager, platform_manager **plat_manager) {
+int game_set(player **p, square **floor, obstacle_manager **obs_manager, platform_manager **plat_manager, ALLEGRO_BITMAP **bg) {
 
 	if(!p || !floor || !obs_manager || !plat_manager) {
         fprintf(stderr, "ERRO GAME SET\n") ;
@@ -262,7 +262,7 @@ int game_set(player **p, square **floor, obstacle_manager **obs_manager, platfor
 	int floor_center_y = Y_SCREEN - H_GROUND / 2 ;
 	int player_start_y = Y_FLOOR - PLAYER_H / 2 ; 
 
-	*p = player_create(PLAYER_W, PLAYER_H, PLAYER_START_X, player_start_y, X_SCREEN, Y_SCREEN);
+	*p = player_create(PLAYER_W, PLAYER_H, PLAYER_START_X, player_start_y, X_SCREEN, Y_SCREEN, *bg);
 	*floor = square_create(X_SCREEN, H_GROUND, X_SCREEN/2, floor_center_y, X_SCREEN, Y_SCREEN);
     *obs_manager = obstacle_manager_create(5, 2.0f, 1.0f) ;
     *plat_manager = platform_manager_create(MAX_PLATFORMS, PLATFORM_SPAWN_INTERVAL) ;

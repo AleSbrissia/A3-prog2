@@ -10,12 +10,13 @@
 #include "fase.h"
 #include "player.h"
 
-#define DIFFERENT_OBSTACLES 4 
+#define DIFFERENT_OBSTACLES 5
 typedef enum {
     stem,
     arrow,
     stone,
-    spike
+    spike_down,
+    spike_up
     
 } obstacle_type;
 
@@ -46,7 +47,8 @@ void obstacle_destroy(obstacle* obs);
 void obstacle_reset(obstacle* obs, int screen_width, int y_floor) ;
 
 // Movimento e colisão
-int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int gravity) ;
+int obstacle_update_movement(obstacle* obs, player *p, int screen_width, int y_floor, int gravity) ;
+float obstacle_relative_speed(obstacle* obs, player* p) ;
 bool obstacle_check_collision(obstacle* obs, player* p);
 int draw_obstacle(obstacle* obs);
 

@@ -24,10 +24,9 @@ typedef enum {
 
 typedef struct player {
 
-	int w, h, x, y;
+	int w, h, x, y ;
 	int visual_w, visual_h ;	
-
-	joystick *control;	
+	float scroll_x ;
 
 	bool ground;
 	float fall;
@@ -38,6 +37,7 @@ typedef struct player {
 
 	player_state state;
 	ALLEGRO_BITMAP **sprites; 
+	joystick *control;	
 
 } player;		
 
@@ -59,10 +59,11 @@ typedef struct {
 platform* platform_create(int x, int y, int w, int h);
 void platform_destroy(platform* plat);
 void platform_reset(platform* plat, int screen_width);
+float platform_relative_speed(platform *plat, player* p) ;
 
 // Sistema de gerenciamento
 platform_manager* platform_manager_create(int max_platforms, float spawn_interval);
-void platform_manager_update(platform_manager* manager, float delta_time, int screen_width);
+void platform_manager_update(platform_manager *manager, player *p, float delta_time, int screen_width) ;
 void platform_manager_draw(platform_manager* manager);
 void platform_manager_destroy(platform_manager* manager);
 void platform_manager_reset_all(platform_manager* manager, int screen_width);

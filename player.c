@@ -11,7 +11,7 @@
 #include "fase.h"
 #include "platform.h"
 
-player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){	
+player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, ALLEGRO_BITMAP *bg){	
 
 	if ((x - xside/2 < 0) || (x + xside/2 > max_x))
 	    return NULL;
@@ -36,9 +36,9 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y){
 	new_player->win = false ;
 	new_player->damage_dalay = 0 ;
 
-	new_player->control = joystick_create();
+    set_player_scroll(bg, new_player) ;
 
-    //implementacao dos sprites
+	new_player->control = joystick_create();
     new_player->sprites = malloc(sizeof(ALLEGRO_BITMAP*) * PLAYER_STATES);
     
     // Carrega cada sprite
@@ -101,13 +101,13 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
         for (int i = 0; i < plat_manager->max_platforms; i++) 
             if (plat_manager->platforms[i] && plat_manager->platforms[i]->active) 
                 if (platform_check_collision(plat_manager->platforms[i], p)) {
+
                     platform_handle_collision(plat_manager->platforms[i], p);
                     on_platform = true;
                     break;
                 }
     }
 
-	//const float move_dist = PLAYER_SPEED_PER_SEC * dt;
 	int move_dist = PLAYER_STEP ;
     player_state old_st = p->state ;
 
@@ -161,7 +161,6 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
     if (p->control->right) {
         p->x += move_dist;
     } 
-
     else if (p->control->left) {
         p->x -= move_dist;
     }
@@ -314,5 +313,24 @@ void player_update_state(player *p, player_state old_st) {
         p->w = PLAYER_W_CROUCHED ;
         p->h = PLAYER_H_CROUCHED ;
         p->y = p->y + (PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
+    }
+}
+
+//trecho copiado da funcao player_draw para pegar o scrool
+void set_player_scroll(ALLEGRO_BITMAP *bg, player *p) {
+    
+    if (!p) return ;
+
+    if (bg) {
+        int img_w = al_get_bitmap_width(bg);
+        int img_h = al_get_bitmap_height(bg);
+        int disp_h = al_get_display_height(al_get_current_display());
+        
+        // Escala para preencher a altura da tela
+        float scale = (float)disp_h / img_h;
+        float draw_w = img_w * scale;
+        
+        // Calcula a posição de scroll baseada na posição do player
+        p->scroll_x = fmod(p->x * SCROLL_SPEED, draw_w) ;
     }
 }

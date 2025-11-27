@@ -57,7 +57,7 @@ int main() {
     bool redraw = true ; 
     int menu_select = 1 ;
 
-    game_set(&p1, &floor, &obs_manager, &plat_manager) ;
+    game_set(&p1, &floor, &obs_manager, &plat_manager, &game_bg_img) ;
 
     al_start_timer(timer);
 
@@ -70,13 +70,13 @@ int main() {
             case ALLEGRO_EVENT_TIMER :
                 
                 if(estado == GAMEPLAY) {
-                    player_update_movement(p1, 1.0/FPS, floor, plat_manager) ;
+
                     obstacle_manager_update(obs_manager, 1.0/FPS, p1, X_SCREEN, Y_FLOOR, GRAVITY) ;
 
-
                     if(plat_manager) {
-                        platform_manager_update(plat_manager, 1.0/FPS, X_SCREEN) ;
+                        platform_manager_update(plat_manager, p1, 1.0/FPS, X_SCREEN) ;
                     }
+                    player_update_movement(p1, 1.0/FPS, floor, plat_manager) ;
 
                     if(p1->health == 0) {
                         p1->alive = false ;
@@ -125,7 +125,7 @@ int main() {
 
                                 obstacle_manager_reset_all(obs_manager, X_SCREEN, Y_FLOOR) ;
                                 game_clean(p1, floor, obs_manager, plat_manager) ;
-                                game_set(&p1, &floor, &obs_manager, &plat_manager) ;
+                                game_set(&p1, &floor, &obs_manager, &plat_manager, &game_bg_img) ;
                                 estado = GAMEPLAY;
                             } 
                             else {
@@ -145,7 +145,7 @@ int main() {
 
                                 obstacle_manager_reset_all(obs_manager, X_SCREEN, Y_FLOOR) ;
                                 game_clean(p1, floor, obs_manager, plat_manager) ;
-                                game_set(&p1, &floor, &obs_manager, &plat_manager) ;
+                                game_set(&p1, &floor, &obs_manager, &plat_manager, &game_bg_img) ;
                                 estado = GAMEPLAY;
                             } 
                             else {
@@ -197,6 +197,7 @@ int main() {
                 case GAMEPLAY : 
                     al_clear_to_color(al_map_rgb(0, 0, 0));
                     draw_gameplay(game_bg_img, p1, floor, plat_manager) ;
+                    //draw_gameplay(NULL, p1, floor, plat_manager) ;
                     obstacle_manager_draw(obs_manager) ;
 
                 break;

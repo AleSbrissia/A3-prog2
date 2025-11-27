@@ -39,11 +39,42 @@ void obstacle_reset(obstacle* obs, int screen_width, int y_floor) {
     
 }
 
-int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int gravity) {
+float obstacle_relative_speed(obstacle* obs, player* p) {
+    if (!obs || !p) return obs->speed_x;
+    
+    float relative_speed = obs->speed_x;
+    float t = 6.0;
+    
+    // Se o obstáculo está à frente do player
+    if (obs->x > p->x) {
+        if (p->control->right) {
+            // Player indo para direita - obstáculo vem mais devagar
+            relative_speed -= t;
+        } else if (p->control->left) {
+            // Player indo para esquerda - obstáculo vem mais rápido
+            relative_speed += t;
+        }
+    }
+    // Se o obstáculo está atrás do player
+    else if (obs->x < p->x) {
+        if (p->control->right) {
+            // Player indo para direita - obstáculo vem mais rápido
+            relative_speed -= t;
+        } else if (p->control->left) {
+            // Player indo para esquerda - obstáculo vem mais devagar
+            relative_speed += t;
+        }
+    }
+    
+    return relative_speed;
+}
+
+int obstacle_update_movement(obstacle* obs, player *p, int screen_width, int y_floor, int gravity) {
     if (!obs || !obs->active) return 0;
 
     // Movimento horizontal com rolling background
-    obs->x += obs->speed_x;
+    float visual_speed = obstacle_relative_speed(obs, p) ;
+    obs->x += visual_speed;
 
     // Reset quando sair da tela pela esquerda
     if (obs->x + obs->w/2 < 0) {
@@ -59,11 +90,10 @@ int obstacle_update_movement(obstacle* obs, int screen_width, int y_floor, int g
         // Colisão com o chão
         if (obs->y + obs->h/2 >= y_floor) {
 
-            if(obs->type == spike) {
+            if(obs->type == spike_down) {
                 obstacle_reset(obs, screen_width, y_floor);
                 return 1; // Obstáculo resetado
             }
-
 
             obs->y = y_floor - obs->h/2;
             obs->speed_y = 0;
@@ -136,7 +166,8 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     manager->obstacles_sprites[stem] = al_load_bitmap("assets/sprites/obstacles/stem.png");
     manager->obstacles_sprites[arrow] = al_load_bitmap("assets/sprites/obstacles/arrow.png"); 
     manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/obstacles/stone.png");
-    manager->obstacles_sprites[spike] = al_load_bitmap("assets/sprites/obstacles/spike1down.png");
+    manager->obstacles_sprites[spike_down] = al_load_bitmap("assets/sprites/obstacles/spike1down.png");
+    manager->obstacles_sprites[spike_up] = al_load_bitmap("assets/sprites/obstacles/spike.png");
     
     // Verifica se carregou
     for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {
@@ -167,7 +198,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
     ALLEGRO_BITMAP *sprite = NULL ;
     int i, aleat, width, height, spawn_x, spawn_y;
     int visual_w, visual_h ;
-    float speed_x, speed_y;
+    float speed_x, speed_y ;
                 
     if (!manager) return;
     
@@ -188,8 +219,9 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
 
                 //obs_type = arrow ;
                 //obs_type = stone ;
+                //obs_type = spike_up ;
 
-                printf("TIPO %d\n", obs_type) ;
+                //printf("TIPO %d\n", obs_type) ;
                 
                 switch (obs_type) {
                     case stem: 
@@ -204,8 +236,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         speed_x = (float) -(rand() % 9) -7 ;
                         speed_y = 0 ;
 
-                        printf("Criando STEM - sprite: %p\n", sprite);
-
                     break; 
 
                     case arrow: 
@@ -219,8 +249,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
 
                         speed_x = (float) -(rand() % 10) -15 ;
                         speed_y = 0 ;
-
-                        printf("Criando ARROW - sprite: %p\n", sprite);
                     
                     break; 
 
@@ -236,18 +264,32 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         speed_x = (float) -(rand() % 10) -10 ;
                         speed_y =  0.5f;
 
-                        printf("Criando STONE - sprite: %p\n", sprite);
-                    
                     break; 
 
-                    case spike: 
+                    case spike_down: 
                     
                         visual_w = 120; visual_h = 25; 
                         width = 120; height = 25; 
-                        sprite = manager->obstacles_sprites[spike] ;
+                        sprite = manager->obstacles_sprites[spike_down] ;
                     
                         spawn_x = screen_width -width -(rand()% 400) ;
                         spawn_y = 0 ; //spawna no em cima
+
+                        speed_x = 0 ;
+                        speed_y = 0.1f ;
+
+                        printf("Criando SPIKE - sprite: %p\n", sprite);
+
+                    break; 
+
+                    case spike_up:
+
+                        visual_w = 120; visual_h = 25; 
+                        width = 120; height = 25; 
+                        sprite = manager->obstacles_sprites[spike_up] ;
+                    
+                        spawn_x = screen_width -width -(rand()% 400) ;
+                        spawn_y = y_floor -height/3 ; 
 
                         speed_x = 0 ;
                         speed_y = 0.1f ;
@@ -275,7 +317,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
     // Atualiza obstáculos ativos e verifica colisões
     for (int i = 0; i < manager->max_obstacles; i++) {
         if (manager->obstacles[i] && manager->obstacles[i]->active) {
-            obstacle_update_movement(manager->obstacles[i], screen_width, y_floor, gravity);
+            obstacle_update_movement(manager->obstacles[i], player, screen_width, y_floor, gravity);
             
             // Verifica colisão com player
             if (obstacle_check_collision(manager->obstacles[i], player)) {

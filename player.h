@@ -25,12 +25,13 @@
 #define PLAYER_STEP 3 
 #define PLAYER_JUMP -20
 
-player* player_create(int xside, int yside, int x, int y,int max_x, int max_y);
+player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, ALLEGRO_BITMAP *bg) ;	
 void player_move(player *element, char steps, int trajectory, int max_x, int max_y);
 void player_destroy(player *element);
 void player_update_movement(player *p, float dt, square *floor, platform_manager *plat_manager) ;
 void player_draw_health(player *p) ;
 void draw_player(player *p) ;
 void player_update_state(player *p, player_state old_st) ;
+void set_player_scroll(ALLEGRO_BITMAP *bg, player *p) ;
 
 #endif

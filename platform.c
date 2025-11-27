@@ -31,7 +31,7 @@ void platform_reset(platform* plat, int screen_width) {
     
     // Reposiciona a plataforma à direita da tela
     plat->x = screen_width + (rand() % 300) + 100;
-    plat->y = (rand() % 300) +300 ; // Posição Y aleatória
+    plat->y = -150*(rand() % 2) +425; // Posição Y aleatória
     plat->active = false;
 }
 
@@ -63,6 +63,36 @@ void platform_handle_collision(platform* plat, player* p) {
         p->fall = 0;
         //p->ground = true;
     }
+}
+
+float platform_relative_speed(platform *plat, player* p) {
+    if (!plat || !p) return plat->x;
+    
+    float relative_speed = plat->x;
+    float t = 6.0;
+    
+    // Se o obstáculo está à frente do player
+    if (plat->x > p->x) {
+        if (p->control->right) {
+            // Player indo para direita - obstáculo vem mais devagar
+            relative_speed -= t;
+        } else if (p->control->left) {
+            // Player indo para esquerda - obstáculo vem mais rápido
+            relative_speed += t;
+        }
+    }
+    // Se o obstáculo está atrás do player
+    else if (plat->x < p->x) {
+        if (p->control->right) {
+            // Player indo para direita - obstáculo vem mais rápido
+            relative_speed -= t;
+        } else if (p->control->left) {
+            // Player indo para esquerda - obstáculo vem mais devagar
+            relative_speed += t;
+        }
+    }
+    
+    return relative_speed;
 }
 
 void draw_platform(platform* plat) {
@@ -97,7 +127,7 @@ platform_manager* platform_manager_create(int max_platforms, float spawn_interva
     manager->platforms = malloc(sizeof(platform*) * max_platforms);
     manager->count = 0;
     manager->max_platforms = max_platforms;
-    manager->spawn_timer = 0;
+    manager->spawn_timer = PLATFORM_SPAWN_INTERVAL;
     manager->spawn_interval = spawn_interval;
     
     // Inicializa plataformas como NULL
@@ -109,28 +139,34 @@ platform_manager* platform_manager_create(int max_platforms, float spawn_interva
     return manager;
 }
 
-void platform_manager_update(platform_manager* manager, float delta_time, int screen_width) {
+void platform_manager_update(platform_manager *manager, player *p, float delta_time, int screen_width) {
     if (!manager) return;
     
+    int width, height, spawn_x, spawn_y ;
+
     manager->spawn_timer += delta_time;
     
     // Spawn de novas plataformas
     if (manager->spawn_timer >= manager->spawn_interval) {
         for (int i = 0; i < manager->max_platforms; i++) {
             if (!manager->platforms[i] || !manager->platforms[i]->active) {
-                // Cria nova plataforma se slot vazio ou inativo
+                
+                
+                width = (rand() % 100) + 200;  
+                height = 35; 
+                spawn_y = -150*(rand() % 2) +425; // apenas 2 posicoes
+
+                // plataformas depois do inicio
                 if (manager->platforms[i]) {
                     platform_destroy(manager->platforms[i]);
+                    spawn_x = screen_width +rand()%200 ;
+                    manager->spawn_timer = 0;
                 }
-                
-                // Aleatoriza tamanho e cor da plataforma
-                int width = (rand() % 100) + 80;  // Largura entre 80-180
-                int height = 30; // Altura fixa
-                int spawn_x = screen_width + (rand() % 100) ;
-                int spawn_y = (rand() % 300) + 300; // Posição Y aleatória
+                else {
+                    spawn_x = rand() % screen_width ;
+                }
                                 
                 manager->platforms[i] = platform_create(spawn_x, spawn_y, width, height);
-                manager->spawn_timer = 0;
                 break;
             }
         }
@@ -139,9 +175,9 @@ void platform_manager_update(platform_manager* manager, float delta_time, int sc
     // Atualiza plataformas ativas
     for (int i = 0; i < manager->max_platforms; i++) {
         if (manager->platforms[i] && manager->platforms[i]->active) {
-            // Move plataformas para a esquerda (scroll)
-            manager->platforms[i]->x -= 3; // Velocidade de scroll
             
+            manager->platforms[i]->x = platform_relative_speed(manager->platforms[i], p) ;
+
             // Reset quando sair da tela pela esquerda
             if (manager->platforms[i]->x + manager->platforms[i]->w < 0) {
                 platform_reset(manager->platforms[i], screen_width);
