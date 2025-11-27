@@ -26,7 +26,6 @@ typedef struct player {
 
 	int w, h, x, y ;
 	int visual_w, visual_h ;	
-	float scroll_x ;
 
 	bool ground;
 	float fall;

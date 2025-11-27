@@ -90,7 +90,7 @@ int obstacle_update_movement(obstacle* obs, player *p, int screen_width, int y_f
         // Colisão com o chão
         if (obs->y + obs->h/2 >= y_floor) {
 
-            if(obs->type == spike_down) {
+            if(obs->type == spike_down || obs->type == spear) {
                 obstacle_reset(obs, screen_width, y_floor);
                 return 1; // Obstáculo resetado
             }
@@ -168,6 +168,7 @@ obstacle_manager* obstacle_manager_create(int max_obs, float spawn_interval, flo
     manager->obstacles_sprites[stone] = al_load_bitmap("assets/sprites/obstacles/stone.png");
     manager->obstacles_sprites[spike_down] = al_load_bitmap("assets/sprites/obstacles/spike1down.png");
     manager->obstacles_sprites[spike_up] = al_load_bitmap("assets/sprites/obstacles/spike.png");
+    manager->obstacles_sprites[spear] = al_load_bitmap("assets/sprites/obstacles/spear.png");
     
     // Verifica se carregou
     for (int i = 0; i < DIFFERENT_OBSTACLES; i++) {
@@ -220,6 +221,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 //obs_type = arrow ;
                 //obs_type = stone ;
                 //obs_type = spike_up ;
+                //obs_type = spear ;
 
                 //printf("TIPO %d\n", obs_type) ;
                 
@@ -259,7 +261,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         sprite = manager->obstacles_sprites[stone] ;
 
                         spawn_x = screen_width +100 ;
-                        spawn_y = y_floor -height -200 -(rand()%200) ; //spawna no ar
+                        spawn_y = y_floor -height -400; //-(rand()%200) ; //spawna no ar
 
                         speed_x = (float) -(rand() % 10) -10 ;
                         speed_y =  0.5f;
@@ -272,7 +274,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         width = 120; height = 25; 
                         sprite = manager->obstacles_sprites[spike_down] ;
                     
-                        spawn_x = screen_width -width -(rand()% 400) ;
+                        spawn_x = screen_width -width ;
                         spawn_y = 0 ; //spawna no em cima
 
                         speed_x = 0 ;
@@ -288,15 +290,31 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         width = 120; height = 25; 
                         sprite = manager->obstacles_sprites[spike_up] ;
                     
-                        spawn_x = screen_width -width -(rand()% 400) ;
+                        spawn_x = screen_width -width  ;
                         spawn_y = y_floor -height/3 ; 
 
                         speed_x = 0 ;
                         speed_y = 0.1f ;
 
-                        printf("Criando SPIKE - sprite: %p\n", sprite);
+                        printf("Criando SPIKE_up - sprite: %p\n", sprite);
 
                     break; 
+
+                    case spear:
+
+                        visual_w = 60; visual_h = 60; 
+                        width = 60; height = 60; 
+                        sprite = manager->obstacles_sprites[spear] ;
+
+                        spawn_x = screen_width + width;
+                        spawn_y = -height +(rand()%200) ; //spawna no ar
+
+                        speed_x = (float) -15 -(rand()%15);
+                        speed_y =  0.5f;
+
+                        printf("Criando Spear - sprite: %p\n", sprite);
+
+                    break;
                 }
                 
                 manager->obstacles[i] = obstacle_create(

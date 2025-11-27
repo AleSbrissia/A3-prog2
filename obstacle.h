@@ -10,13 +10,14 @@
 #include "fase.h"
 #include "player.h"
 
-#define DIFFERENT_OBSTACLES 5
+#define DIFFERENT_OBSTACLES 6
 typedef enum {
     stem,
     arrow,
     stone,
     spike_down,
-    spike_up
+    spike_up,
+    spear
     
 } obstacle_type;
 

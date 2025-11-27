@@ -315,22 +315,3 @@ void player_update_state(player *p, player_state old_st) {
         p->y = p->y + (PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
     }
 }
-
-//trecho copiado da funcao player_draw para pegar o scrool
-void set_player_scroll(ALLEGRO_BITMAP *bg, player *p) {
-    
-    if (!p) return ;
-
-    if (bg) {
-        int img_w = al_get_bitmap_width(bg);
-        int img_h = al_get_bitmap_height(bg);
-        int disp_h = al_get_display_height(al_get_current_display());
-        
-        // Escala para preencher a altura da tela
-        float scale = (float)disp_h / img_h;
-        float draw_w = img_w * scale;
-        
-        // Calcula a posição de scroll baseada na posição do player
-        p->scroll_x = fmod(p->x * SCROLL_SPEED, draw_w) ;
-    }
-}
