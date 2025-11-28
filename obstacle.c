@@ -217,13 +217,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                 aleat = rand() % DIFFERENT_OBSTACLES;
                 obs_type = aleat ;
 
-                //obs_type = arrow ;
-                //obs_type = stone ;
-                //obs_type = spike_up ;
-                //obs_type = spear ;
-
-                //printf("TIPO %d\n", obs_type) ;
-                
                 switch (obs_type) {
                     case stem: 
 
@@ -260,7 +253,7 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         sprite = manager->obstacles_sprites[stone] ;
 
                         spawn_x = screen_width +100 ;
-                        spawn_y = y_floor -height -400; //-(rand()%200) ; //spawna no ar
+                        spawn_y = y_floor -height -(rand()%400) ; //spawna no ar
 
                         speed_x = (float) -(rand() % 10) -10 ;
                         speed_y =  0.5f;

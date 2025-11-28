@@ -32,11 +32,11 @@ void platform_reset(platform* plat, int screen_width) {
     plat->active = false;
 }
 
-// Retorna o tipo de colisão: 0 = nenhuma, 1 = topo, 2 = lateral/baixo
+// tipo de colisão: 0 = nenhuma, 1 = topo, 2 = lateral/baixo
 int platform_check_collision(platform* plat, player* p) {
     if (!plat || !plat->active || !p) return -1;
     
-    // Calcula bounding boxes
+    // limites
     float p_bot = p->y + p->h/2;
     float p_top = p->y - p->h/2;
     float p_prev_bot = p_bot - p->fall; // Posição anterior estimada
@@ -159,7 +159,6 @@ platform_manager* platform_manager_create(int max_platforms, float spawn_interva
         manager->platforms[i] = NULL;
     }
 
-    //srand(time(NULL));
     srand(0);
     return manager;
 }
