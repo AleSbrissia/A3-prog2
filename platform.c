@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-platform* platform_create(int x, int y, int w, int h) {
+platform* platform_create(int x, int y, int w, int h, ALLEGRO_BITMAP *sprite) {
     platform* plat = malloc(sizeof(platform));
     if (!plat) return NULL;
     
@@ -12,16 +12,13 @@ platform* platform_create(int x, int y, int w, int h) {
     plat->w = w;
     plat->h = h;
     plat->active = true;
-    plat->sprite = NULL;
-    
+    plat->sprite = sprite ;
+
     return plat;
 }
 
 void platform_destroy(platform* plat) {
     if (plat) {
-        if (plat->sprite) {
-            al_destroy_bitmap(plat->sprite);
-        }
         free(plat);
     }
 }
@@ -35,33 +32,57 @@ void platform_reset(platform* plat, int screen_width) {
     plat->active = false;
 }
 
-bool platform_check_collision(platform* plat, player* p) {
-    if (!plat || !plat->active || !p) return false;
+// Retorna o tipo de colisão: 0 = nenhuma, 1 = topo, 2 = lateral/baixo
+int platform_check_collision(platform* plat, player* p) {
+    if (!plat || !plat->active || !p) return -1;
     
+    // Calcula bounding boxes
+    float player_bottom = p->y + p->h/2;
+    float player_top = p->y - p->h/2;
+    float player_prev_bottom = player_bottom - p->fall; // Posição anterior estimada
+    
+    float platform_top = plat->y;
+    float platform_bottom = plat->y + plat->h;
+    
+    // Verifica colisão no eixo X
     bool collision_x = (p->x + p->w/2 >= plat->x) && 
                       (p->x - p->w/2 <= plat->x + plat->w);
     
-    bool collision_y = (p->y + p->h/2 >= plat->y) && 
-                      (p->y - p->h/2 <= plat->y + plat->h);
+    if (!collision_x) return 0;
     
-    return collision_x && collision_y;
+    // Verifica colisão no eixo Y
+    bool collision_y = (player_bottom >= platform_top) && 
+                      (player_top <= platform_bottom);
+    
+    if (!collision_y) return 0;
+    
+    // Agora verifica o TIPO de colisão
+    // Colisão pelo TOPO: player estava acima e agora está colidindo
+    if (p->fall >= 0 && 
+        player_prev_bottom <= platform_top && 
+        player_bottom >= platform_top) {
+        return 1; // Colisão pelo topo
+    }
+    
+    return 2; // Colisão lateral ou por baixo
 }
 
-/*ARRUMAR*/
-void platform_handle_collision(platform* plat, player* p) {
+void platform_handle_collision(platform* plat, player* p, int col_type) {
     if (!plat || !p || !plat->active) return;
     
-    // Verifica se o player está caindo e está acima da plataforma
-    if (p->fall >= 0 && 
-        p->y + p->h/2 >= plat->y && 
-        p->y + p->h/2 <= plat->y + 10 && // Margem pequena para detectar "pouso"
-        p->x + p->w/2 >= plat->x && 
-        p->x - p->w/2 <= plat->x + plat->w) {
-        
-        // Coloca o player em cima da plataforma
-        p->y = plat->y - p->h/2;
+    // Coloca o player em cima da plataforma
+    if (col_type == 1) {
+
+        p->y = plat->y - p->h/2 ;
         p->fall = 0;
-        //p->ground = true;
+        p->platform = true;
+    }
+
+    // Verifica se o player está caindo e está acima da plataforma
+    if (p->fall >= 0 &&  col_type == 2) {
+        
+        p->fall = 0;
+        p->grab = true ;
     }
 }
 
@@ -108,6 +129,12 @@ void draw_platform(platform* plat) {
                              plat->w,
                              plat->h,
                              0);
+            
+        // DEBUG: Desenha hitbox (opcional - remova na versão final)
+        al_draw_rectangle(plat->x, plat->y,
+                         plat->x + plat->w, plat->y + plat->h,
+                         al_map_rgb(0, 255, 0), 2);
+                    
     } else {
         // Desenha plataforma como retângulo
         al_draw_filled_rectangle(plat->x, plat->y,
@@ -129,6 +156,10 @@ platform_manager* platform_manager_create(int max_platforms, float spawn_interva
     manager->max_platforms = max_platforms;
     manager->spawn_timer = PLATFORM_SPAWN_INTERVAL;
     manager->spawn_interval = spawn_interval;
+
+    manager->sprite = al_load_bitmap("assets/sprites/platform.png");
+    if(!manager->sprite)
+        printf("ERRO: Não carregou sprite de plataforma\n");
     
     // Inicializa plataformas como NULL
     for (int i = 0; i < max_platforms; i++) {
@@ -153,8 +184,8 @@ void platform_manager_update(platform_manager *manager, player *p, float delta_t
                 
                 
                 width = (rand() % 100) + 200;  
-                height = 35; 
-                spawn_y = -150*(rand() % 2) +425; // apenas 2 posicoes
+                height = 45; 
+                spawn_y = 175*(rand() % 2) +250; // apenas 2 posicoes
 
                 // plataformas depois do inicio
                 if (manager->platforms[i]) {
@@ -166,7 +197,7 @@ void platform_manager_update(platform_manager *manager, player *p, float delta_t
                     spawn_x = rand() % screen_width ;
                 }
                                 
-                manager->platforms[i] = platform_create(spawn_x, spawn_y, width, height);
+                manager->platforms[i] = platform_create(spawn_x, spawn_y, width, height, manager->sprite);
                 break;
             }
         }

@@ -26,7 +26,9 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, 
     new_player->visual_w = xside ;
     new_player->visual_h = yside ;
 
+    new_player->grab = false ;
 	new_player->ground = true;	
+    new_player->platform = false ;
 	new_player->fall = 0 ;
     new_player->state = STILL_R;
 
@@ -35,8 +37,6 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, 
 	new_player->alive = true ;
 	new_player->win = false ;
 	new_player->damage_dalay = 0 ;
-
-    set_player_scroll(bg, new_player) ;
 
 	new_player->control = joystick_create();
     new_player->sprites = malloc(sizeof(ALLEGRO_BITMAP*) * PLAYER_STATES);
@@ -49,6 +49,8 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, 
     new_player->sprites[JUMPING_R] = al_load_bitmap("assets/sprites/player/jump.png");
     new_player->sprites[JUMPING_L] = al_load_bitmap("assets/sprites/player/jump_left.png");
     new_player->sprites[CROUCHING] = al_load_bitmap("assets/sprites/player/crouched2.png");
+    new_player->sprites[GRABING_R] = al_load_bitmap("assets/sprites/player/grab.png");
+    new_player->sprites[GRABING_L] = al_load_bitmap("assets/sprites/player/grab_left.png");
     
     // Verifica se carregou
     for (int i = 0; i < PLAYER_STATES; i++) {
@@ -88,71 +90,41 @@ void player_destroy(player *element){
 // Atualiza o movimento e estado do jogador com base nos controles
 void player_update_movement(player *p, float dt, square *floor, platform_manager *plat_manager) {
 
+	int move_dist, plat_col  ;
+
     if (!p || !p->control) {
 		fprintf(stderr, "NULL pointer player_update \n") ;
 		return;
 	}
 
-    //ARRUMAR
+    p->platform = false;
+    p->grab = false;
+
     //colisão com plataformas 
-    bool on_platform = false;
     if (plat_manager) {
-
         for (int i = 0; i < plat_manager->max_platforms; i++) 
-            if (plat_manager->platforms[i] && plat_manager->platforms[i]->active) 
-                if (platform_check_collision(plat_manager->platforms[i], p)) {
+            if (plat_manager->platforms[i] && plat_manager->platforms[i]->active) {
 
-                    platform_handle_collision(plat_manager->platforms[i], p);
-                    on_platform = true;
+                plat_col = platform_check_collision(plat_manager->platforms[i], p) ;
+               
+                if(plat_col != 0) {
+                    
+                    platform_handle_collision(plat_manager->platforms[i], p, plat_col) ;
                     break;
                 }
+
+            }
     }
 
-	int move_dist = PLAYER_STEP ;
+	move_dist = PLAYER_STEP ;
     player_state old_st = p->state ;
 
 	if(p->damage_dalay != 0)
 		p->damage_dalay-- ;
 
     //controla os estados
+    player_set_state(p, old_st);
 
-	//agachado
-    if (p->control->down && (p->ground || on_platform)) {
- 
-		p->state = CROUCHING ;
-    }
-	//andando 
-    if ((p->control->right) && (p->ground || on_platform)) {
-        p->state = WALKING_R ;
-    }
-    if ((p->control->left) && (p->ground || on_platform)) {
-        p->state = WALKING_L ;
-    }
-	//parado
-    if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && (p->ground || on_platform)) {
-
-        if (old_st == JUMPING_R || old_st == WALKING_R || old_st == STILL_R )
-            p->state = STILL_R;
-        if (old_st == JUMPING_L || old_st == WALKING_L || old_st == STILL_L )
-            p->state = STILL_L;
-    }
-	//pulando 
-    if (p->control->up && (p->ground || on_platform)) {
-        
-        if (old_st == WALKING_R || old_st == STILL_R )
-            p->state = JUMPING_R ;
-        if (old_st == WALKING_L || old_st == STILL_L )
-            p->state = JUMPING_L;
-    }
-	//caindo
-    if(!p->ground && !on_platform) {
-
-        if (p->control->right) 
-            p->state = JUMPING_R ;
-        
-        if (p->control->left) 
-            p->state = JUMPING_L ;
-    }
     //atualiza estado 
     if (p->state != old_st)
         player_update_state(p, old_st) ;
@@ -164,12 +136,10 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
     else if (p->control->left) {
         p->x -= move_dist;
     }
-
     //borda esquerda
     if (p->x < p->w/2) {
         p->x = p->w/2;
     }
-
     //CONDICAO DE VITORIA
 	if (p->x + p->w/2 > X_SCREEN) {
 		p->x = X_SCREEN - p->w/2;  // Encosta na borda direita
@@ -180,15 +150,14 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
     }
 
     //Logica de pulo 
-    if (p->control->up && (p->ground || on_platform)) {
+    if (p->control->up && (p->ground || p->platform)) {
 
         p->fall = PLAYER_JUMP;
         p->ground = false;
-        on_platform = false;
+        p->platform = false;
     }
-
     //Logica de queda
-    if (!p->ground && !on_platform) {
+    if (!p->ground && !p->platform && !p->grab) {
 
         p->fall += GRAVITY;
         p->y += p->fall;
@@ -200,7 +169,7 @@ void player_update_movement(player *p, float dt, square *floor, platform_manager
             p->ground = true;
         }
     }
-    else if (on_platform) p->fall = 0 ;
+    else if (p->platform) p->fall = 0 ;
 
 }
 
@@ -313,5 +282,56 @@ void player_update_state(player *p, player_state old_st) {
         p->w = PLAYER_W_CROUCHED ;
         p->h = PLAYER_H_CROUCHED ;
         p->y = p->y + (PLAYER_H/2 -PLAYER_H_CROUCHED/2) ;
+    }
+}
+
+void player_set_state(player *p, player_state old_st) {
+
+    if (!p) return ;
+
+	//agachado
+    if (p->control->down && (p->ground || p->platform)) {
+ 
+		p->state = CROUCHING ;
+    }
+	//andando 
+    if ((p->control->right) && (p->ground || p->platform)) {
+        p->state = WALKING_R ;
+    }
+    if ((p->control->left) && (p->ground || p->platform)) {
+        p->state = WALKING_L ;
+    }
+	//parado
+    if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && (p->ground || p->platform)) {
+
+        if (old_st == JUMPING_R || old_st == WALKING_R || old_st == STILL_R )
+            p->state = STILL_R;
+        if (old_st == JUMPING_L || old_st == WALKING_L || old_st == STILL_L )
+            p->state = STILL_L;
+    }
+	//pulando 
+    if (p->control->up && (p->ground || p->platform)) {
+        
+        if (old_st == WALKING_R || old_st == STILL_R )
+            p->state = JUMPING_R ;
+        if (old_st == WALKING_L || old_st == STILL_L )
+            p->state = JUMPING_L;
+    }
+	//caindo
+    if(!p->ground && !p->platform && !p->grab) {
+
+        if (p->control->right) 
+            p->state = JUMPING_R ;
+        
+        if (p->control->left) 
+            p->state = JUMPING_L ;
+    }
+    if(p->grab) {
+
+        if (p->control->right || old_st == JUMPING_R)
+            p->state = GRABING_R ;
+        if (p->control->left || old_st == JUMPING_L)
+            p->state = GRABING_L ;
+        
     }
 }

@@ -19,7 +19,9 @@ typedef enum {
 	WALKING_L,
 	JUMPING_R,
 	JUMPING_L,
-	CROUCHING
+	CROUCHING,
+	GRABING_R,
+	GRABING_L
 } player_state;
 
 typedef struct player {
@@ -27,7 +29,7 @@ typedef struct player {
 	int w, h, x, y ;
 	int visual_w, visual_h ;	
 
-	bool ground;
+	bool ground, platform, grab;
 	float fall;
 
 	int health, max_health ; 
@@ -52,10 +54,11 @@ typedef struct {
     int max_platforms;
     float spawn_timer;
     float spawn_interval;
+    ALLEGRO_BITMAP* sprite;
 } platform_manager;
 
 // Funções básicas da plataforma
-platform* platform_create(int x, int y, int w, int h);
+platform* platform_create(int x, int y, int w, int h, ALLEGRO_BITMAP *sprite) ;
 void platform_destroy(platform* plat);
 void platform_reset(platform* plat, int screen_width);
 float platform_relative_speed(platform *plat, player* p) ;
@@ -68,7 +71,7 @@ void platform_manager_destroy(platform_manager* manager);
 void platform_manager_reset_all(platform_manager* manager, int screen_width);
 
 // Colisão com player
-bool platform_check_collision(platform* plat, player* p);
-void platform_handle_collision(platform* plat, player* p);
+int platform_check_collision(platform* plat, player* p) ;
+void platform_handle_collision(platform* plat, player* p, int col_type) ;
 
 #endif
