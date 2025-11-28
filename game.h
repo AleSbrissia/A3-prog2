@@ -9,7 +9,6 @@
 #include "platform.h"
 #include "obstacle.h"
 #include "player.h"
-#include "fase.h"
 
 #define X_SCREEN 1280 
 #define Y_SCREEN 720

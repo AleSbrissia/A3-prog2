@@ -9,7 +9,6 @@
 
 #include "player.h"
 #include "game.h"
-#include "fase.h"
 #include "obstacle.h"
 
 int main() {
@@ -61,10 +60,12 @@ int main() {
 
     al_start_timer(timer);
 
+    //loop principal
     while(!done){
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
 
+        //Trata todos os possíveis eventos
         switch (event.type)
         {
             case ALLEGRO_EVENT_TIMER :
@@ -197,7 +198,6 @@ int main() {
                 case GAMEPLAY : 
                     al_clear_to_color(al_map_rgb(0, 0, 0));
                     draw_gameplay(game_bg_img, p1, floor, plat_manager) ;
-                    //draw_gameplay(NULL, p1, floor, plat_manager) ;
                     obstacle_manager_draw(obs_manager) ;
 
                 break;
@@ -206,14 +206,12 @@ int main() {
         }
     }
 
+    game_clean(p1, floor, obs_manager, plat_manager) ;
     al_destroy_font(font);	
     al_destroy_display(disp);	
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
     if (game_bg_img) al_destroy_bitmap(game_bg_img);  
-    player_destroy(p1) ;
-    obstacle_manager_destroy(obs_manager) ;
-    platform_manager_destroy(plat_manager) ;
 
     return 0;
 }

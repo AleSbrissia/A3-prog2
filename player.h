@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include "joystick.h"
-#include "fase.h"
 #include "platform.h"
 
 #define PLAYER_W 50	
@@ -27,7 +26,6 @@
 #define PLAYER_GRAB -15
 
 player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, ALLEGRO_BITMAP *bg) ;	
-void player_move(player *element, char steps, int trajectory, int max_x, int max_y);
 void player_destroy(player *element);
 void player_update_movement(player *p, float dt, square *floor, platform_manager *plat_manager) ;
 void player_draw_health(player *p) ;

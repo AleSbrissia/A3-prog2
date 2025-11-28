@@ -1,7 +1,7 @@
-#include "platform.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+
+#include "platform.h"
 
 platform* platform_create(int x, int y, int w, int h, ALLEGRO_BITMAP *sprite) {
     platform* plat = malloc(sizeof(platform));
@@ -37,34 +37,32 @@ int platform_check_collision(platform* plat, player* p) {
     if (!plat || !plat->active || !p) return -1;
     
     // Calcula bounding boxes
-    float player_bottom = p->y + p->h/2;
-    float player_top = p->y - p->h/2;
-    float player_prev_bottom = player_bottom - p->fall; // Posição anterior estimada
+    float p_bot = p->y + p->h/2;
+    float p_top = p->y - p->h/2;
+    float p_prev_bot = p_bot - p->fall; // Posição anterior estimada
     
-    float platform_top = plat->y;
-    float platform_bottom = plat->y + plat->h;
+    float plat_top = plat->y;
+    float plat_bot = plat->y + plat->h;
     
     // Verifica colisão no eixo X
-    bool collision_x = (p->x + p->w/2 >= plat->x) && 
+    bool col_x = (p->x + p->w/2 >= plat->x) && 
                       (p->x - p->w/2 <= plat->x + plat->w);
     
-    if (!collision_x) return 0;
+    if (!col_x) return 0;
     
     // Verifica colisão no eixo Y
-    bool collision_y = (player_bottom >= platform_top) && 
-                      (player_top <= platform_bottom);
+    bool col_y = (p_bot >= plat_top) && 
+                      (p_top <= plat_bot);
     
-    if (!collision_y) return 0;
+    if (!col_y) return 0;
     
-    // Agora verifica o TIPO de colisão
-    // Colisão pelo TOPO: player estava acima e agora está colidindo
     if (p->fall >= 0 && 
-        player_prev_bottom <= platform_top && 
-        player_bottom >= platform_top) {
+        p_prev_bot <= plat_top && 
+        p_bot >= plat_top) {
         return 1; // Colisão pelo topo
     }
     
-    return 2; // Colisão lateral ou por baixo
+    return 2 ;
 }
 
 void platform_handle_collision(platform* plat, player* p, int col_type) {
@@ -244,4 +242,24 @@ void platform_manager_reset_all(platform_manager* manager, int screen_width) {
         }
     }
     manager->spawn_timer = 0;
+}
+
+square* square_create(int w, int h, int x, int y, int max_x, int max_y){
+
+	if ((x - w/2 < 0) || (x + w/2 > max_x))
+	    return NULL;
+	if ((y - h/2 < 0) || (y + h/2 > max_y))
+	    return NULL;
+
+	square *t = (square*) malloc(sizeof(square));
+	t->w = w;
+	t->h = h;
+	t->x = x;
+	t->y = y;
+	return t;
+}
+
+void square_destroy(square *s) {
+    if (s)
+        free(s) ;
 }

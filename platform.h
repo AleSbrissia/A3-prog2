@@ -6,10 +6,15 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
+
 #include "joystick.h"
 
 #define MAX_PLATFORMS 3
 #define PLATFORM_SPAWN_INTERVAL 3.0f
+
+typedef struct {
+	int w, h, x, y ;
+}square ;
 
 typedef enum {
 
@@ -57,7 +62,11 @@ typedef struct {
     ALLEGRO_BITMAP* sprite;
 } platform_manager;
 
-// Funções básicas da plataforma
+// Funções para o chão
+square* square_create(int w, int h, int x, int y, int max_x, int max_y) ;
+void square_destroy(square *s) ; 
+
+// Funções da plataforma
 platform* platform_create(int x, int y, int w, int h, ALLEGRO_BITMAP *sprite) ;
 void platform_destroy(platform* plat);
 void platform_reset(platform* plat, int screen_width);

@@ -8,7 +8,6 @@
 #include "player.h"
 #include "joystick.h"
 #include "game.h"
-#include "fase.h"
 #include "platform.h"
 
 player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, ALLEGRO_BITMAP *bg){	
@@ -62,28 +61,9 @@ player* player_create(int xside, int yside, int x, int y, int max_x, int max_y, 
 	return new_player;
 }
 
-void player_move(player *element, char steps, int trajectory, int max_x, int max_y){
-
-	if (!trajectory){
-		if ((element->x - steps*PLAYER_STEP) - element->w/2 >= 0)
-			element->x = element->x - steps*PLAYER_STEP;
-	} 
-	else if (trajectory == 1){
-		if ((element->x + steps*PLAYER_STEP) + element->w/2 <= max_x)
-		    element->x = element->x + steps*PLAYER_STEP;
-	}
-	else if (trajectory == 2){
-		if ((element->y - steps*PLAYER_STEP) - element->h/2 >= 0)
-		    element->y = element->y - steps*PLAYER_STEP;
-	}
-	else if (trajectory == 3){ 
-		if ((element->y + steps*PLAYER_STEP) + element->h/2 <= max_y)
-		    element->y = element->y + steps*PLAYER_STEP;
-	}
-}
-
 void player_destroy(player *element){
 	joystick_destroy(element->control);	
+    free(element->sprites) ;
 	free(element);
 }
 
@@ -300,7 +280,7 @@ void player_set_state(player *p, player_state old_st) {
 
     if (!p) return ;
 
-    // Se estava em grab mas não está mais segurando, força transição
+    // estava em grab mas não está mais segurando
     if ((old_st == GRABING_R || old_st == GRABING_L) && !p->grab) {
         if (p->control->right) 
             p->state = JUMPING_R;

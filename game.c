@@ -251,7 +251,6 @@ void draw_victory(ALLEGRO_BITMAP* bg, ALLEGRO_FONT *font, int selected_opt) {
                  "Sair do Jogo");
 }
 
-//NECESSITA DE PONTEIROS NULOS
 int game_set(player **p, square **floor, obstacle_manager **obs_manager, platform_manager **plat_manager, ALLEGRO_BITMAP **bg) {
 
 	if(!p || !floor || !obs_manager || !plat_manager) {
@@ -282,9 +281,10 @@ int game_clean(player *p, square *floor, obstacle_manager *obs_manager, platform
     }
 
     player_destroy(p);
-    free(floor) ;
+    square_destroy(floor) ;
     obstacle_manager_destroy(obs_manager) ;
     platform_manager_destroy(plat_manager) ;
 
     return 0 ;
 }
+

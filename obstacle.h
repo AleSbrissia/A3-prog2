@@ -7,8 +7,8 @@
 #include <allegro5/allegro_primitives.h>	
 #include <allegro5/allegro_image.h>
 
-#include "fase.h"
 #include "player.h"
+#include "platform.h"
 
 #define DIFFERENT_OBSTACLES 6
 typedef enum {
