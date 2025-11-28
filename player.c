@@ -301,6 +301,19 @@ void player_set_state(player *p, player_state old_st) {
 
     if (!p) return ;
 
+    // Se estava em grab mas não está mais segurando, força transição
+    if ((old_st == GRABING_R || old_st == GRABING_L) && !p->grab) {
+        if (p->control->right) 
+            p->state = JUMPING_R;
+        else if (p->control->left)
+            p->state = JUMPING_L;
+        else if (old_st == GRABING_R)
+            p->state = JUMPING_R;
+        else
+            p->state = JUMPING_L;
+        return; 
+    }
+
 	//agachado
     if (p->control->down && (p->ground || p->platform || p->grab)) {
  
@@ -309,9 +322,11 @@ void player_set_state(player *p, player_state old_st) {
 	//andando 
     if ((p->control->right) && (p->ground || p->platform)) {
         p->state = WALKING_R ;
+        return ;
     }
     if ((p->control->left) && (p->ground || p->platform)) {
         p->state = WALKING_L ;
+        return ;
     }
 	//parado
     if(!p->control->left && !p->control->right && !p->control->up && !p->control->down && (p->ground || p->platform)) {
@@ -328,6 +343,7 @@ void player_set_state(player *p, player_state old_st) {
             p->state = GRABING_R ;
         if (p->control->left || old_st == JUMPING_L)
             p->state = GRABING_L ;
+        return ;
     }
 	//pulando e grab 
     if (p->control->up && (p->ground || p->platform || p->grab)) {
@@ -336,6 +352,7 @@ void player_set_state(player *p, player_state old_st) {
             p->state = JUMPING_R ;
         if (old_st == WALKING_L || old_st == STILL_L || old_st == GRABING_L )
             p->state = JUMPING_L;
+        return ;
     }
 	//caindo
     if(!p->ground && !p->platform && !p->grab) {
