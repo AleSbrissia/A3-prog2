@@ -205,7 +205,6 @@ void player_draw_health(player *p) {
             border_color = al_map_rgb(100, 100, 100); // Cinza escuro
         }
         
-        // Desenha um "coração" simplificado (losango)
         al_draw_filled_rectangle(x, y, x + HEALTH_BAR_W, y + HEALTH_BAR_H, fill_color);
         al_draw_rectangle(x, y, x + HEALTH_BAR_W, y + HEALTH_BAR_H, border_color, 2);
     }
@@ -229,13 +228,13 @@ void draw_player(player *p) {
                                 0);
 
             // Desenha a hitbox (vermelha) e área visual (azul)
-            al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
+        /*    al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
                             p->x + p->w/2, p->y + p->h/2,
                             al_map_rgb(255, 0, 0), 3);  // Hitbox vermelha
 
             al_draw_rectangle(p->x - p->visual_w/2, p->y - p->visual_h/2,
                             p->x + p->visual_w/2, p->y + p->visual_h/2,
-                            al_map_rgb(0, 0, 255), 1);  // Área visual azul
+                            al_map_rgb(0, 0, 255), 1);  // Área visual azul*/
         }
         else 
             al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,
@@ -259,13 +258,13 @@ void draw_player(player *p) {
                                 0);
 
             // Desenha a hitbox (vermelha) e área visual (azul)
-            al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
+            /*al_draw_rectangle(p->x - p->w/2, p->y - p->h/2,
                             p->x + p->w/2, p->y + p->h/2,
                             al_map_rgb(255, 0, 0), 3);  // Hitbox vermelha
 
             al_draw_rectangle(p->x - p->visual_w/2, p->y - p->visual_h/2,
                             p->x + p->visual_w/2, p->y + p->visual_h/2,
-                            al_map_rgb(0, 0, 255), 1);  // Área visual azul
+                            al_map_rgb(0, 0, 255), 1);  // Área visual azul*/
         }
         else 
             al_draw_filled_rectangle(p->x - p->w/2, p->y - p->h/2,

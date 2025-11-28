@@ -17,7 +17,6 @@ obstacle* obstacle_create(int x, int y, int w, int h, int v_w, int v_h, float sp
     obs->speed_x = speed_x;
     obs->speed_y = speed_y;
     obs->active = true;
-    obs->color = al_map_rgb(0, 255, 0); // Cor padrão verde 
     obs->type = type ;
     obs->sprite = sprite ;
     
@@ -134,19 +133,19 @@ int draw_obstacle(obstacle* obs) {
                              0);
         
         // Desenha a hitbox 
-        al_draw_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
+        /*al_draw_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
                          obs->x + obs->w/2, obs->y + obs->h/2,
                          al_map_rgb(255, 0, 0), 2);
 
         al_draw_rectangle(obs->x - obs->visual_w/2, obs->y - obs->visual_h/2,
                 obs->x + obs->visual_w/2, obs->y + obs->visual_h/2,
-                al_map_rgb(0, 0, 255), 1);  // Área visual azul
+                al_map_rgb(0, 0, 255), 1);  // Área visual azul*/
                          
     } else {
         // Fallback: desenha retângulo
         al_draw_filled_rectangle(obs->x - obs->w/2, obs->y - obs->h/2,
                                obs->x + obs->w/2, obs->y + obs->h/2,
-                               obs->color);
+                               al_map_rgb(255, 0, 0));
     }
 
     return 0;
@@ -280,8 +279,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         speed_x = 0 ;
                         speed_y = 0.1f ;
 
-                        printf("Criando SPIKE - sprite: %p\n", sprite);
-
                     break; 
 
                     case spike_up:
@@ -296,8 +293,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
                         speed_x = 0 ;
                         speed_y = 0.1f ;
 
-                        printf("Criando SPIKE_up - sprite: %p\n", sprite);
-
                     break; 
 
                     case spear:
@@ -311,8 +306,6 @@ void obstacle_manager_update(obstacle_manager* manager, float delta_time, player
 
                         speed_x = (float) -15 -(rand()%15);
                         speed_y =  0.5f;
-
-                        printf("Criando Spear - sprite: %p\n", sprite);
 
                     break;
                 }

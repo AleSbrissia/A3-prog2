@@ -28,7 +28,6 @@ typedef struct {
     bool active;
     obstacle_type type;
     ALLEGRO_BITMAP* sprite;
-    ALLEGRO_COLOR color;
 } obstacle;
 
 // Sistema de gerenciamento de múltiplos obstáculos

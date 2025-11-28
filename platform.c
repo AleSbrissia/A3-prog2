@@ -130,11 +130,6 @@ void draw_platform(platform* plat) {
                              plat->h,
                              0);
             
-        // DEBUG: Desenha hitbox (opcional - remova na versão final)
-        al_draw_rectangle(plat->x, plat->y,
-                         plat->x + plat->w, plat->y + plat->h,
-                         al_map_rgb(0, 255, 0), 2);
-                    
     } else {
         // Desenha plataforma como retângulo
         al_draw_filled_rectangle(plat->x, plat->y,
