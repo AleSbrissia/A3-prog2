@@ -92,23 +92,23 @@ float platform_relative_speed(platform *plat, player* p) {
     float relative_speed = plat->x;
     float t = 6.0;
     
-    // Se o obstáculo está à frente do player
+    // o obstáculo está à frente do player
     if (plat->x > p->x) {
         if (p->control->right) {
-            // Player indo para direita - obstáculo vem mais devagar
+            // indo para direita - obstáculo vem mais devagar
             relative_speed -= t;
         } else if (p->control->left) {
-            // Player indo para esquerda - obstáculo vem mais rápido
+            // indo para esquerda - obstáculo vem mais rápido
             relative_speed += t;
         }
     }
-    // Se o obstáculo está atrás do player
+    // o obstáculo está atrás do player
     else if (plat->x < p->x) {
         if (p->control->right) {
-            // Player indo para direita - obstáculo vem mais rápido
+            // indo para direita - obstáculo vai mais rápido
             relative_speed -= t;
         } else if (p->control->left) {
-            // Player indo para esquerda - obstáculo vem mais devagar
+            // indo para esquerda - obstáculo vai mais devagar
             relative_speed += t;
         }
     }
@@ -166,7 +166,8 @@ platform_manager* platform_manager_create(int max_platforms, float spawn_interva
         manager->platforms[i] = NULL;
     }
 
-    srand(time(NULL));
+    //srand(time(NULL));
+    srand(0);
     return manager;
 }
 
